@@ -58,39 +58,17 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         return treeRoot
     }
 
-    private fun findCommandByCommandWithArgs(
-        rawCommand: RawCommand
+    private fun findRegisteredCommand(
+        commandWithArgs: CommandWithArgs
     ): Command {
-
-        fun findPreferredTree(
-            root: CommandTreeEntry,
-            commandWithArgs: List<String>
-        ): CommandTreeEntry {
-            var currentTree = root
-            for (element in commandWithArgs) {
-                currentTree = currentTree.children[element] ?: break
-            }
-            return currentTree
+        var currentTree = buildCommandTree()
+        var lastNonNullCommand: Command? = null
+        for (element in commandWithArgs) {
+            currentTree = currentTree.children[element] ?: break
+            currentTree.command?.let { lastNonNullCommand = it }
         }
 
-        fun getCommandByTree(tree: CommandTreeEntry): Command {
-            var command: Command? = tree.command
-            var currentTree = tree
-
-            while (command == null) {
-                currentTree = currentTree.parent ?: break
-                command = currentTree.command
-            }
-
-            return command!!
-        }
-
-        val preferredTree = findPreferredTree(
-            buildCommandTree(),
-            rawCommand
-        )
-
-        return getCommandByTree(preferredTree)
+        return lastNonNullCommand!!
     }
 
     private fun executeCommandAsync(
@@ -98,8 +76,11 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         command: BukkitCommand,
         args: Array<String>
     ) {
-        val commandWithArgs = RawCommand.fromCommandAndArgs(command.name, args.toList())
-        val foundCommand = findCommandByCommandWithArgs(commandWithArgs)
+        val commandWithArgs = CommandWithArgs.fromCommandAndArgs(
+            command.name,
+            args
+        )
+        val foundCommand = findRegisteredCommand(commandWithArgs)
 
         val handler = handlers.getValue(foundCommand)
         @Suppress("NAME_SHADOWING")
@@ -122,11 +103,11 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         args: Array<String>
     ): List<String> {
         val argsWithoutSpace = args.filter { !it.contains(' ') }
-        val rawCommand = RawCommand.fromCommandAndArgs(
+        val commandWithArgs = CommandWithArgs.fromCommandAndArgs(
             bukkitCommand.name,
-            argsWithoutSpace
+            argsWithoutSpace.toTypedArray()
         )
-        val command = findCommandByCommandWithArgs(rawCommand)
+        val command = findRegisteredCommand(commandWithArgs)
 
         @Suppress("NAME_SHADOWING")
         val args = command.getArgsFromList(argsWithoutSpace)
@@ -135,15 +116,11 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
 
         val completedArgs = if (args.isNotEmpty()) {
             args.dropLast(1)
-        } else {
-            emptyList()
-        }
+        } else { emptyList() }
 
         val uncompletedArg = if (args.isNotEmpty()) {
             args.last()
-        } else {
-            ""
-        }
+        } else { "" }
 
         return handler.handleTabComplete(
             this,
@@ -180,7 +157,26 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
                     args
                 )
             }
+
             return true
+        }
+    }
+}
+
+private class CommandWithArgs private constructor(list: List<String>) :
+    List<String> by list {
+
+    companion object {
+
+        fun fromCommandAndArgs(command: String, args: Array<String>): CommandWithArgs {
+            return CommandWithArgs(
+                ArrayList<String>().apply {
+                    add(command.toLowerCase())
+                    for (e in args) {
+                        add(e.toLowerCase())
+                    }
+                }
+            )
         }
     }
 }
@@ -189,5 +185,6 @@ private class CommandTreeEntry(
     var command: Command?,
     val parent: CommandTreeEntry?
 ) {
+
     val children = HashMap<String, CommandTreeEntry>()
 }
