@@ -39,6 +39,13 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
 
     abstract fun newRootCommandHandler(command: Command): CommandHandler
 
+    fun getCandiatesByCommand(command: Command): List<String> {
+        val commandWithArgs = CommandWithArgs.fromCommand(command)
+        val tree = getTreeByCommandWithArgs(commandWithArgs)
+
+        return tree.children.keys.toList()
+    }
+
     private fun buildCommandTree(): CommandTreeEntry {
         val commands = handlers.keys.toList()
         val treeRoot = CommandTreeEntry(null, null)
@@ -58,14 +65,27 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         return treeRoot
     }
 
+    private fun getTreeByCommandWithArgs(
+        commandWithArgs: CommandWithArgs
+    ): CommandTreeEntry {
+        var tree = buildCommandTree()
+
+        for (element in commandWithArgs) {
+            tree = tree.children[element] ?: break
+        }
+
+        return tree
+    }
+
     private fun findRegisteredCommand(
         commandWithArgs: CommandWithArgs
     ): Command {
-        var currentTree = buildCommandTree()
-        var lastNonNullCommand: Command? = null
-        for (element in commandWithArgs) {
-            currentTree = currentTree.children[element] ?: break
-            currentTree.command?.let { lastNonNullCommand = it }
+        var tree = getTreeByCommandWithArgs(commandWithArgs)
+        var lastNonNullCommand: Command? = tree.command
+
+        while (lastNonNullCommand == null) {
+            tree = tree.parent ?: break
+            lastNonNullCommand = tree.command
         }
 
         return lastNonNullCommand!!
@@ -168,7 +188,10 @@ private class CommandWithArgs private constructor(list: List<String>) :
 
     companion object {
 
-        fun fromCommandAndArgs(command: String, args: Array<String>): CommandWithArgs {
+        fun fromCommandAndArgs(
+            command: String,
+            args: Array<String>
+        ): CommandWithArgs {
             return CommandWithArgs(
                 ArrayList<String>().apply {
                     add(command.toLowerCase())
@@ -177,6 +200,10 @@ private class CommandWithArgs private constructor(list: List<String>) :
                     }
                 }
             )
+        }
+
+        fun fromCommand(command: Command): CommandWithArgs {
+            return CommandWithArgs(command.command)
         }
     }
 }

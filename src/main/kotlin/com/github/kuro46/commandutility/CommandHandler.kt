@@ -23,6 +23,6 @@ abstract class CommandHandler {
         completedArgs: List<String>,
         uncompletedArg: String
     ): List<String> {
-        return emptyList()
+        return caller.getCandiatesByCommand(command)
     }
 }
