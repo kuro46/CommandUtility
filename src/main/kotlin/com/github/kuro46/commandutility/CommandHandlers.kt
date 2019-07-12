@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 class CommandHandlers {
 
     private val handlers = ConcurrentHashMap<Command, CommandHandler>()
-    private val handlerTreeCache = ValueCache<CommandTreeEntry>()
+    private val handlerTreeCache = ValueCache<ImmutableCommandTreeEntry>()
 
     operator fun get(command: Command): CommandHandler? {
         return handlers[command]
@@ -16,11 +16,11 @@ class CommandHandlers {
         handlerTreeCache.clear()
     }
 
-    fun getHandlerTree(): CommandTreeEntry {
+    fun getHandlerTree(): ImmutableCommandTreeEntry {
         return handlerTreeCache.getOrSet { buildHandlerTree() }
     }
 
-    private fun buildHandlerTree(): CommandTreeEntry {
+    private fun buildHandlerTree(): ImmutableCommandTreeEntry {
         val commands = handlers.keys.toList()
         val treeRoot = CommandTreeEntry(null, null)
 
@@ -36,15 +36,34 @@ class CommandHandlers {
             currentTree.command = command
         }
 
-        return treeRoot
+        return treeRoot.toImmutable()
     }
 }
 
-// TODO: make immutable
 class CommandTreeEntry(
     var command: Command?,
     val parent: CommandTreeEntry?
 ) {
 
     val children = HashMap<String, CommandTreeEntry>()
+
+    fun toImmutable(): ImmutableCommandTreeEntry {
+        val map = HashMap<String, ImmutableCommandTreeEntry>()
+
+        for ((key, value) in children) {
+            map[key] = value.toImmutable()
+        }
+
+        return ImmutableCommandTreeEntry(
+            command,
+            parent?.toImmutable(),
+            map
+        )
+    }
 }
+
+class ImmutableCommandTreeEntry(
+    val command: Command?,
+    val parent: ImmutableCommandTreeEntry?,
+    val children: Map<String, ImmutableCommandTreeEntry>
+)
