@@ -20,6 +20,7 @@ import org.bukkit.plugin.Plugin
 abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor) {
 
     private val handlers = ConcurrentHashMap<Command, CommandHandler>()
+    private val handlerTree = ValueCache<CommandTreeEntry>()
     private val commandExecutor = CommandExecutorImpl()
     private val tabCompleter = TabCompleterImpl()
 
@@ -28,7 +29,7 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         val command = Command.fromString(command)
         val name = command[0]
 
-        val needRegisterCommand = handlers.filterKeys { it[0] == name }.isEmpty()
+        val needRegisterCommand = getHandlerTree().children.containsKey(name)
 
         handlers[command] = handler
 
@@ -56,7 +57,11 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         return tree.children.keys.toList()
     }
 
-    private fun buildCommandTree(): CommandTreeEntry {
+    private fun getHandlerTree(): CommandTreeEntry {
+        return handlerTree.getOrSet { buildHandlerTree() }
+    }
+
+    private fun buildHandlerTree(): CommandTreeEntry {
         val commands = handlers.keys.toList()
         val treeRoot = CommandTreeEntry(null, null)
 
@@ -78,7 +83,7 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
     private fun getTreeByCommandWithArgs(
         commandWithArgs: CommandWithArgs
     ): CommandTreeEntry {
-        var tree = buildCommandTree()
+        var tree = getHandlerTree()
 
         for (element in commandWithArgs) {
             tree = tree.children[element] ?: break
