@@ -1,7 +1,6 @@
 package com.github.kuro46.commandutility
 
 import com.github.kuro46.commandutility.syntax.ParseResult
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 import org.bukkit.Bukkit
 import org.bukkit.command.Command as BukkitCommand
@@ -154,13 +153,9 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
 
         val handler = handlers[command]!!
 
-        val completedArgs = if (args.isNotEmpty()) {
-            args.dropLast(1)
-        } else { emptyList() }
+        val completedArgs = if (args.isNotEmpty()) args.dropLast(1) else emptyList()
 
-        val uncompletedArg = if (args.isNotEmpty()) {
-            args.last()
-        } else { "" }
+        val uncompletedArg = if (args.isNotEmpty()) args.last() else ""
 
         return handler.handleTabComplete(
             this,

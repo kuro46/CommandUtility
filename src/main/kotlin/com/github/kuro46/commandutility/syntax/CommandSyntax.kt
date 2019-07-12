@@ -47,11 +47,7 @@ class CommandSyntax(
                     if (argumentSyntax.isRequired && rawArgument == null) {
                         return ParseResult.Error(ParseError.ARGUMENTS_NOT_ENOUGH)
                     }
-                    if (rawArgument == null) {
-                        null
-                    } else {
-                        rawArguments.drop(index).joinToString(" ")
-                    }
+                    rawArgument?.let { rawArguments.drop(index).joinToString(" ") }
                 }
             }
 
@@ -82,11 +78,7 @@ class CommandSyntax(
                 is RequiredArgument -> Pair("<", ">")
                 is OptionalArgument -> Pair("[", "]")
                 is LongArgument -> {
-                    if (info.isRequired) {
-                        Pair("<", ">")
-                    } else {
-                        Pair("[", "]")
-                    }
+                    if (info.isRequired) Pair("<", ">") else Pair("[", "]")
                 }
             }
         }
