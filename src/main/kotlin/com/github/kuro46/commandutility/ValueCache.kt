@@ -21,4 +21,8 @@ class ValueCache<T>(initial: T? = null) {
             value
         }
     }
+
+    fun clear() {
+        softReference = SoftReference(null)
+    }
 }

@@ -19,8 +19,7 @@ import org.bukkit.plugin.Plugin
  */
 abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor) {
 
-    private val handlers = ConcurrentHashMap<Command, CommandHandler>()
-    private val handlerTree = ValueCache<CommandTreeEntry>()
+    private val handlers = CommandHandlers()
     private val commandExecutor = CommandExecutorImpl()
     private val tabCompleter = TabCompleterImpl()
 
@@ -29,7 +28,7 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         val command = Command.fromString(command)
         val name = command[0]
 
-        val needRegisterCommand = getHandlerTree().children.containsKey(name)
+        val needRegisterCommand = handlers.getHandlerTree().children.containsKey(name)
 
         handlers[command] = handler
 
@@ -57,33 +56,10 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         return tree.children.keys.toList()
     }
 
-    private fun getHandlerTree(): CommandTreeEntry {
-        return handlerTree.getOrSet { buildHandlerTree() }
-    }
-
-    private fun buildHandlerTree(): CommandTreeEntry {
-        val commands = handlers.keys.toList()
-        val treeRoot = CommandTreeEntry(null, null)
-
-        for (command in commands) {
-            var currentTree = treeRoot
-            for (commandElement in command) {
-                if (!currentTree.children.containsKey(commandElement)) {
-                    currentTree.children[commandElement] = CommandTreeEntry(null, currentTree)
-                }
-
-                currentTree = currentTree.children.getValue(commandElement)
-            }
-            currentTree.command = command
-        }
-
-        return treeRoot
-    }
-
     private fun getTreeByCommandWithArgs(
         commandWithArgs: CommandWithArgs
     ): CommandTreeEntry {
-        var tree = getHandlerTree()
+        var tree = handlers.getHandlerTree()
 
         for (element in commandWithArgs) {
             tree = tree.children[element] ?: break
@@ -136,7 +112,7 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         )
         val foundCommand = findRegisteredCommand(commandWithArgs)
 
-        val handler = handlers.getValue(foundCommand)
+        val handler = handlers[foundCommand]!!
         @Suppress("NAME_SHADOWING")
         val args = foundCommand.getArgsFromList(commandWithArgs)
         val parseResult = handler.commandSyntax.parseArguments(args)
@@ -176,7 +152,7 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         @Suppress("NAME_SHADOWING")
         val args = command.getArgsFromList(argsWithoutSpace)
 
-        val handler = handlers.getValue(command)
+        val handler = handlers[command]!!
 
         val completedArgs = if (args.isNotEmpty()) {
             args.dropLast(1)
@@ -250,12 +226,4 @@ private class CommandWithArgs private constructor(list: List<String>) :
             return CommandWithArgs(command.command)
         }
     }
-}
-
-private class CommandTreeEntry(
-    var command: Command?,
-    val parent: CommandTreeEntry?
-) {
-
-    val children = HashMap<String, CommandTreeEntry>()
 }
