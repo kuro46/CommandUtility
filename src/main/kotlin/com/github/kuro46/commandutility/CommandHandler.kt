@@ -9,6 +9,8 @@ abstract class CommandHandler {
 
     abstract val commandSyntax: CommandSyntax
 
+    abstract val senderType: CommandSenderType
+
     abstract fun handleCommand(
         caller: CommandHandlerManager,
         sender: CommandSender,

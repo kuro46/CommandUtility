@@ -1,12 +1,15 @@
 package com.github.kuro46.commandutility
 
+import com.github.kuro46.commandutility.syntax.ParseResult
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 import org.bukkit.Bukkit
 import org.bukkit.command.Command as BukkitCommand
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import org.bukkit.command.ConsoleCommandSender
 import org.bukkit.command.TabCompleter
+import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 
 /**
@@ -38,6 +41,13 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
     }
 
     abstract fun newRootCommandHandler(command: Command): CommandHandler
+
+    abstract fun handleCastError(sender: CommandSender, castError: CastError)
+
+    abstract fun handleParseError(
+        sender: CommandSender,
+        parseError: ParseError
+    )
 
     fun getCandiatesByCommand(command: Command): List<String> {
         val commandWithArgs = CommandWithArgs.fromCommand(command)
@@ -91,6 +101,25 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         return lastNonNullCommand!!
     }
 
+    private fun validateCommandSender(
+        sender: CommandSender,
+        expected: CommandSenderType
+    ): CastError? {
+        return if (
+            expected == CommandSenderType.PLAYER &&
+            sender !is Player
+        ) {
+            CastError.CANNOT_CAST_TO_PLAYER
+        } else if (
+            expected == CommandSenderType.CONSOLE &&
+            sender !is ConsoleCommandSender
+        ) {
+            CastError.CANNOT_CAST_TO_CONSOLE
+        } else {
+            null
+        }
+    }
+
     private fun executeCommandAsync(
         sender: CommandSender,
         command: BukkitCommand,
@@ -105,14 +134,24 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         val handler = handlers.getValue(foundCommand)
         @Suppress("NAME_SHADOWING")
         val args = foundCommand.getArgsFromList(commandWithArgs)
-        val parsedArgs = handler.commandSyntax.parseArguments(args)
+        val parseResult = handler.commandSyntax.parseArguments(args)
+
+        if (parseResult is ParseResult.Error) {
+            handleParseError(sender, parseResult.error)
+            return
+        }
+
+        validateCommandSender(sender, handler.senderType)?.let {
+            handleCastError(sender, it)
+            return
+        }
 
         handler.executionThread.executeAtSyncOrCurrentThread(plugin) {
             handler.handleCommand(
                 this,
                 sender,
                 foundCommand,
-                parsedArgs
+                (parseResult as ParseResult.Success).args
             )
         }
     }
