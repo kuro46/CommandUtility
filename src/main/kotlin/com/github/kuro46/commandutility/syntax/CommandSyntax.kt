@@ -1,7 +1,5 @@
 package com.github.kuro46.commandutility.syntax
 
-import com.github.kuro46.commandutility.ParseError
-
 /**
  * A CommandSyntax that expresses syntax of command.
  *
@@ -41,23 +39,13 @@ class CommandSyntax(
         validateSyntax()
     }
 
-    fun parseArguments(rawArguments: List<String>): ParseResult {
+    fun parseArguments(rawArguments: List<String>): ParseResult<Map<String, String>> {
         val parsed = HashMap<String, String>()
 
         arguments.forEachIndexed { index, argumentSyntax ->
-            val rawArgument = rawArguments.getOrNull(index)
-
-            val value = when (argumentSyntax) {
-                is RequiredArgument -> {
-                    rawArgument ?: return ParseResult.Error(ParseError.ARGUMENTS_NOT_ENOUGH)
-                }
-                is OptionalArgument -> rawArgument
-                is LongArgument -> {
-                    if (argumentSyntax.isRequired && rawArgument == null) {
-                        return ParseResult.Error(ParseError.ARGUMENTS_NOT_ENOUGH)
-                    }
-                    rawArgument?.let { rawArguments.drop(index).joinToString(" ") }
-                }
+            val value = when (val result = argumentSyntax.parse(index, rawArguments)) {
+                is ParseResult.Success -> result.value
+                is ParseResult.Error -> return ParseResult.Error(result.reason)
             }
 
             if (value != null) {

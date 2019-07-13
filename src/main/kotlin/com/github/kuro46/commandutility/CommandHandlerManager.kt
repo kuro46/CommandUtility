@@ -44,7 +44,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
 
     abstract fun handleParseError(
         sender: CommandSender,
-        parseError: ParseError
+        parseError: ParseErrorReason
     )
 
     fun getCandiatesByCommand(command: Command): List<String> {
@@ -104,7 +104,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
         val parseResult = handler.commandSyntax.parseArguments(args)
 
         if (parseResult is ParseResult.Error) {
-            handleParseError(sender, parseResult.error)
+            handleParseError(sender, parseResult.reason)
             return
         }
 
@@ -117,7 +117,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
             this,
             sender,
             foundCommand,
-            (parseResult as ParseResult.Success).args
+            (parseResult as ParseResult.Success).value
         )
     }
 

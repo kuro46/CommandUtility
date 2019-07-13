@@ -1,10 +1,10 @@
 package com.github.kuro46.commandutility.syntax
 
-import com.github.kuro46.commandutility.ParseError
+import com.github.kuro46.commandutility.ParseErrorReason
 
-sealed class ParseResult {
+sealed class ParseResult<T> {
 
-    data class Error(val error: ParseError) : ParseResult()
+    data class Error<T>(val reason: ParseErrorReason) : ParseResult<T>()
 
-    data class Success(val args: Map<String, String>) : ParseResult()
+    data class Success<T>(val value: T) : ParseResult<T>()
 }

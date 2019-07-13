@@ -1,6 +1,6 @@
 package com.github.kuro46.commandutility
 
-enum class ParseError {
+enum class ParseErrorReason {
 
     ARGUMENTS_NOT_ENOUGH
 }
