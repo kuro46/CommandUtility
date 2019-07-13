@@ -26,7 +26,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
         val command = Command.fromString(command)
         val name = command[0]
 
-        val needRegisterCommand = handlers.getHandlerTree().children.containsKey(name)
+        val needRegisterCommand = handlers.handlerTree.children.containsKey(name)
 
         handlers[command] = handler
 
@@ -49,7 +49,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
 
     fun getCandiatesByCommand(command: Command): List<String> {
         val commandWithArgs = CommandWithArgs.fromCommand(command)
-        val tree = handlers.getHandlerTree().findTree(commandWithArgs)
+        val tree = handlers.handlerTree.findTree(commandWithArgs)
 
         return tree.children.keys.toList()
     }
@@ -57,7 +57,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
     private fun findRegisteredCommand(
         commandWithArgs: CommandWithArgs
     ): Command {
-        var tree = handlers.getHandlerTree().findTree(commandWithArgs)
+        var tree = handlers.handlerTree.findTree(commandWithArgs)
         var lastNonNullCommand: Command? = tree.command
 
         while (lastNonNullCommand == null) {

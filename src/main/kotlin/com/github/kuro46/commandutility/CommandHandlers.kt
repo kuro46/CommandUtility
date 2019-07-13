@@ -5,7 +5,9 @@ import java.util.concurrent.ConcurrentHashMap
 class CommandHandlers {
 
     private val handlers = ConcurrentHashMap<Command, CommandHandler>()
-    private val handlerTreeCache = ValueCache<CommandTreeEntry>()
+
+    var handlerTree = buildHandlerTree()
+        private set
 
     operator fun get(command: Command): CommandHandler? {
         return handlers[command]
@@ -13,11 +15,7 @@ class CommandHandlers {
 
     operator fun set(command: Command, handler: CommandHandler) {
         handlers[command] = handler
-        handlerTreeCache.clear()
-    }
-
-    fun getHandlerTree(): CommandTreeEntry {
-        return handlerTreeCache.getOrSet { buildHandlerTree() }
+        handlerTree = buildHandlerTree()
     }
 
     private fun buildHandlerTree(): CommandTreeEntry {
