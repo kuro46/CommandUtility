@@ -5,8 +5,6 @@ import org.bukkit.command.CommandSender
 
 abstract class CommandHandler {
 
-    abstract val executionThread: ExecutionThreadType
-
     abstract val commandSyntax: CommandSyntax
 
     abstract val senderType: CommandSenderType

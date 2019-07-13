@@ -1,7 +1,6 @@
 package com.github.kuro46.commandutility
 
 import com.github.kuro46.commandutility.syntax.ParseResult
-import java.util.concurrent.Executor
 import org.bukkit.Bukkit
 import org.bukkit.command.Command as BukkitCommand
 import org.bukkit.command.CommandExecutor
@@ -16,7 +15,7 @@ import org.bukkit.plugin.Plugin
  *
  * Thread-Safe
  */
-abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor) {
+abstract class CommandHandlerManager(val plugin: Plugin) {
 
     private val handlers = CommandHandlers()
     private val commandExecutor = CommandExecutorImpl()
@@ -88,7 +87,7 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
         }
     }
 
-    private fun executeCommandAsync(
+    private fun executeCommand(
         sender: CommandSender,
         command: BukkitCommand,
         args: Array<String>
@@ -114,14 +113,12 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
             return
         }
 
-        handler.executionThread.executeAtSyncOrCurrentThread(plugin) {
-            handler.handleCommand(
-                this,
-                sender,
-                foundCommand,
-                (parseResult as ParseResult.Success).args
-            )
-        }
+        handler.handleCommand(
+            this,
+            sender,
+            foundCommand,
+            (parseResult as ParseResult.Success).args
+        )
     }
 
     fun executeTabCompletion(
@@ -173,13 +170,11 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
             label: String,
             args: Array<String>
         ): Boolean {
-            executor.execute {
-                executeCommandAsync(
-                    sender,
-                    command,
-                    args
-                )
-            }
+            executeCommand(
+                sender,
+                command,
+                args
+            )
 
             return true
         }
