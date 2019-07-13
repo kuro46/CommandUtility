@@ -36,19 +36,27 @@ class CommandSyntaxBuilder {
     fun arguments(): List<Argument> = args.toList()
 
     private fun checkArgumentOrder(index: Int, argument: Argument) {
+        if (index == 0) {
+            return
+        }
+
         val prevIndex = index - 1
         val prevArgument = args[prevIndex]
 
-        if (prevIndex == -1 || prevArgument is RequiredArgument) return
+        if (prevArgument is RequiredArgument) return
 
         if (prevArgument is LongArgument) {
             throw CommandSyntaxException("Cannot set any arguments after a long argument.")
         }
 
-        if (prevArgument is OptionalArgument &&
-            (argument is LongArgument && argument.isRequired)
-        ) {
-            throw CommandSyntaxException("Cannot set required arguments after optional arguments.")
+        if (prevArgument is OptionalArgument) {
+            val isArgumentRequired =
+                argument is RequiredArgument ||
+                    (argument is LongArgument && argument.isRequired)
+
+            if (isArgumentRequired) {
+                throw CommandSyntaxException("Cannot set required arguments after optional arguments.")
+            }
         }
     }
 
