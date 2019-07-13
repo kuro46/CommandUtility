@@ -21,8 +21,8 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compileOnly("org.bukkit", "bukkit", "1.12.2-R0.1-SNAPSHOT")
+    implementation(kotlin("stdlib-jdk8"))
+    implementation("org.bukkit", "bukkit", "1.12.2-R0.1-SNAPSHOT")
     testImplementation("org.junit.jupiter:junit-jupiter:5.5.0")
 }
 
