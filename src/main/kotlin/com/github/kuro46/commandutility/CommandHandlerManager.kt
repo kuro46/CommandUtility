@@ -57,7 +57,7 @@ abstract class CommandHandlerManager(val plugin: Plugin, val executor: Executor)
 
     private fun getTreeByCommandWithArgs(
         commandWithArgs: CommandWithArgs
-    ): ImmutableCommandTreeEntry {
+    ): CommandTreeEntry {
         var tree = handlers.getHandlerTree()
 
         for (element in commandWithArgs) {

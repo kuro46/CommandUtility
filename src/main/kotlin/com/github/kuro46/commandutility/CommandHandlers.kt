@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 class CommandHandlers {
 
     private val handlers = ConcurrentHashMap<Command, CommandHandler>()
-    private val handlerTreeCache = ValueCache<ImmutableCommandTreeEntry>()
+    private val handlerTreeCache = ValueCache<CommandTreeEntry>()
 
     operator fun get(command: Command): CommandHandler? {
         return handlers[command]
@@ -16,19 +16,19 @@ class CommandHandlers {
         handlerTreeCache.clear()
     }
 
-    fun getHandlerTree(): ImmutableCommandTreeEntry {
+    fun getHandlerTree(): CommandTreeEntry {
         return handlerTreeCache.getOrSet { buildHandlerTree() }
     }
 
-    private fun buildHandlerTree(): ImmutableCommandTreeEntry {
+    private fun buildHandlerTree(): CommandTreeEntry {
         val commands = handlers.keys.toList()
-        val treeRoot = CommandTreeEntry(null, null)
+        val treeRoot = MutableCommandTreeEntry(null, null)
 
         for (command in commands) {
             var currentTree = treeRoot
             for (commandElement in command) {
                 if (!currentTree.children.containsKey(commandElement)) {
-                    currentTree.children[commandElement] = CommandTreeEntry(null, currentTree)
+                    currentTree.children[commandElement] = MutableCommandTreeEntry(null, currentTree)
                 }
 
                 currentTree = currentTree.children.getValue(commandElement)
@@ -40,21 +40,21 @@ class CommandHandlers {
     }
 }
 
-class CommandTreeEntry(
+class MutableCommandTreeEntry(
     var command: Command?,
-    val parent: CommandTreeEntry?
+    val parent: MutableCommandTreeEntry?
 ) {
 
-    val children = HashMap<String, CommandTreeEntry>()
+    val children = HashMap<String, MutableCommandTreeEntry>()
 
-    fun toImmutable(): ImmutableCommandTreeEntry {
-        val map = HashMap<String, ImmutableCommandTreeEntry>()
+    fun toImmutable(): CommandTreeEntry {
+        val map = HashMap<String, CommandTreeEntry>()
 
         for ((key, value) in children) {
             map[key] = value.toImmutable()
         }
 
-        return ImmutableCommandTreeEntry(
+        return CommandTreeEntry(
             command,
             parent?.toImmutable(),
             map
@@ -62,8 +62,8 @@ class CommandTreeEntry(
     }
 }
 
-class ImmutableCommandTreeEntry(
+class CommandTreeEntry(
     val command: Command?,
-    val parent: ImmutableCommandTreeEntry?,
-    val children: Map<String, ImmutableCommandTreeEntry>
+    val parent: CommandTreeEntry?,
+    val children: Map<String, CommandTreeEntry>
 )
