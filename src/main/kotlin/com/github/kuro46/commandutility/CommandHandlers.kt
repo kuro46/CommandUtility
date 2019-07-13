@@ -40,7 +40,7 @@ class CommandHandlers {
     }
 }
 
-class MutableCommandTreeEntry(
+private class MutableCommandTreeEntry(
     var command: Command?,
     val parent: MutableCommandTreeEntry?
 ) {
