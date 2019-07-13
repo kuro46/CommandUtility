@@ -66,4 +66,15 @@ class CommandTreeEntry(
     val command: Command?,
     val parent: CommandTreeEntry?,
     val children: Map<String, CommandTreeEntry>
-)
+) {
+
+    fun findTree(strings: List<String>): CommandTreeEntry {
+        var currentTree = this
+
+        for (string in strings) {
+            currentTree = currentTree.children[string] ?: break
+        }
+
+        return currentTree
+    }
+}
