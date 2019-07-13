@@ -46,7 +46,7 @@ private class MutableCommandTreeEntry(
     val children = HashMap<String, MutableCommandTreeEntry>()
 
     fun toImmutable(): CommandTreeEntry {
-        val map = HashMap<String, CommandTreeEntry>()
+        val map = HashMap<String, CommandTreeEntry>(children.size)
 
         for ((key, value) in children) {
             map[key] = value.toImmutable()
