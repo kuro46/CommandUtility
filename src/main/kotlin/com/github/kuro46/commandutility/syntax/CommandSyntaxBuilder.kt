@@ -12,9 +12,11 @@ class CommandSyntaxBuilder {
      * @throws CommandSyntaxException if argument order is illegal
      * @param argument the information of an argument to add.
      */
-    fun addArgument(argument: Argument) {
+    fun addArgument(argument: Argument): CommandSyntaxBuilder {
         checkArgumentOrder(args.lastIndex + 1, argument)
         args.add(argument)
+
+        return this
     }
 
     /**
@@ -23,9 +25,11 @@ class CommandSyntaxBuilder {
      * @throws CommandSyntaxException If argument order is illegal.
      * @param argument information of an argument to set.
      */
-    fun setArgument(index: Int, argument: Argument) {
+    fun setArgument(index: Int, argument: Argument): CommandSyntaxBuilder {
         checkArgumentOrder(index, argument)
         args[index] = argument
+
+        return this
     }
 
     /**
