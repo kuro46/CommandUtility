@@ -15,7 +15,9 @@ sealed class Argument {
     abstract fun parse(
         index: Int,
         rawArguments: List<String>
-    ): Either<ParseErrorReason, String?>
+    ): Either<ParseErrorReason, Result?>
+
+    data class Result(val value: String, val usedIndexes: IntRange)
 }
 
 /**
@@ -27,10 +29,10 @@ sealed class Argument {
  */
 data class RequiredArgument(override val name: String) : Argument() {
 
-    override fun parse(index: Int, rawArguments: List<String>): Either<ParseErrorReason, String?> {
+    override fun parse(index: Int, rawArguments: List<String>): Either<ParseErrorReason, Result?> {
         val rawArgument = rawArguments.getOrNull(index)
         return if (rawArgument != null)
-            Either.Right(rawArgument)
+            Either.right(Result(rawArgument, index..index))
         else
             Either.Left(ParseErrorReason.ARGUMENTS_NOT_ENOUGH)
     }
@@ -44,8 +46,15 @@ data class RequiredArgument(override val name: String) : Argument() {
  * @property name name of this argument
  */
 data class OptionalArgument(override val name: String) : Argument() {
-    override fun parse(index: Int, rawArguments: List<String>): Either<ParseErrorReason, String?> {
-        return Either.Right(rawArguments.getOrNull(index))
+    override fun parse(index: Int, rawArguments: List<String>): Either<ParseErrorReason, Result?> {
+        return Either.right(
+            rawArguments.getOrNull(index)?.let {
+                Result(
+                    it,
+                    index..index
+                )
+            }
+        )
     }
 }
 
@@ -63,7 +72,7 @@ data class LongArgument(
     val isRequired: Boolean
 ) : Argument() {
 
-    override fun parse(index: Int, rawArguments: List<String>): Either<ParseErrorReason, String?> {
+    override fun parse(index: Int, rawArguments: List<String>): Either<ParseErrorReason, Result?> {
         if (rawArguments.getOrNull(index) == null) {
             return if (isRequired)
                 Either.Left(ParseErrorReason.ARGUMENTS_NOT_ENOUGH)
@@ -71,6 +80,10 @@ data class LongArgument(
                 Either.Right(null)
         }
 
-        return Either.Right(rawArguments.drop(index).joinToString(" "))
+        val dropped = rawArguments.drop(index)
+        val start = index + 1
+        val end = rawArguments.lastIndex
+
+        return Either.right(Result(dropped.joinToString(" "), start..end))
     }
 }

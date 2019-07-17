@@ -42,21 +42,8 @@ class CommandSyntax(
         validateSyntax()
     }
 
-    fun parseCompleting(raw: List<String>): Either<ParseErrorReason, CompletionData> {
-        val spaceRemoved = raw
-            .filter { it.isNotEmpty() }
-            .let {
-                val last = raw.lastOrNull() ?: ""
-                if (last.isEmpty()) {
-                    val mutable = it.toMutableList()
-                    mutable.add("") // add dummy argument
-                    mutable
-                } else {
-                    it
-                }
-            }
-
-        val parsed = when (val result = parse(spaceRemoved)) {
+    fun parseCompleting(argsWithoutSpace: List<String>): Either<ParseErrorReason, CompletionData> {
+        val parsed = when (val result = parse(argsWithoutSpace)) {
             is Either.Left -> {
                 val (_, reason) = result.a
                 return Either.left(reason)
@@ -64,10 +51,10 @@ class CommandSyntax(
             is Either.Right -> result.b
         }
 
-        val notCompletedArgumentName = arguments.getOrNull(spaceRemoved.lastIndex)
+        val notCompletedArgumentName = arguments.getOrNull(argsWithoutSpace.lastIndex)
             ?.name
             ?: arguments.last().name
-        val notCompletedArgumentValue = spaceRemoved.last()
+        val notCompletedArgumentValue = argsWithoutSpace.last()
 
         val completionData = CompletionData(
             parsed,
@@ -84,13 +71,21 @@ class CommandSyntax(
     ): Either<Pair<ParsedArgs, ParseErrorReason>, ParsedArgs> {
         val parsed = HashMap<String, String>()
 
+        var lastParsedIndex = -1
         arguments.forEachIndexed { index, syntax ->
             val value = when (val result = syntax.parse(index, raw)) {
                 is Either.Left -> return Either.left(Pair(parsed, result.a))
                 is Either.Right -> result.b
             }
 
-            value?.let { parsed[syntax.name] = it }
+            if (value != null) {
+                lastParsedIndex = value.usedIndexes.endInclusive
+                parsed[syntax.name] = value.value
+            }
+        }
+
+        if (lastParsedIndex != raw.lastIndex) {
+            return Either.left(Pair(parsed, ParseErrorReason.TOO_MANY_ARGUMENTS))
         }
 
         return Either.right(parsed)

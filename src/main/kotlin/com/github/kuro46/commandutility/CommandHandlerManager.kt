@@ -129,7 +129,18 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
         bukkitCommand: BukkitCommand,
         args: Array<String>
     ): List<String> {
-        val argsWithoutSpace = args.filter { !it.contains(' ') }
+        val argsWithoutSpace = args
+            .filter { it.isNotEmpty() }
+            .let {
+                val last = it.lastOrNull()
+                if (last == null || last.isEmpty()) {
+                    val mutable = it.toMutableList()
+                    mutable.add("")
+                    mutable
+                } else {
+                    it
+                }
+            }
         val commandWithArgs = CommandWithArgs.fromCommandAndArgs(
             bukkitCommand.name,
             argsWithoutSpace.toTypedArray()
@@ -137,7 +148,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
         val command = findRegisteredCommand(commandWithArgs)
 
         @Suppress("NAME_SHADOWING")
-        val args = command.getArgsFromList(argsWithoutSpace)
+        val args = command.getArgsFromList(command + argsWithoutSpace)
 
         val handler = handlers[command]!!
 
