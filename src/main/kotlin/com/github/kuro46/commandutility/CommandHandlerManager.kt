@@ -26,7 +26,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
         val command = Command.fromString(command)
         val name = command[0]
 
-        val needRegisterCommand = handlers.handlerTree.children.containsKey(name)
+        val needRegisterCommand = !handlers.handlerTree.children.containsKey(name)
 
         handlers[command] = handler
 
