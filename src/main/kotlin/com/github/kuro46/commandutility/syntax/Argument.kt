@@ -1,5 +1,6 @@
 package com.github.kuro46.commandutility.syntax
 
+import arrow.core.Either
 import com.github.kuro46.commandutility.ParseErrorReason
 
 /**
@@ -11,7 +12,10 @@ sealed class Argument {
      */
     abstract val name: String
 
-    abstract fun parse(index: Int, rawArguments: List<String>): ParseResult<String?>
+    abstract fun parse(
+        index: Int,
+        rawArguments: List<String>
+    ): Either<ParseErrorReason, String?>
 }
 
 /**
@@ -23,12 +27,12 @@ sealed class Argument {
  */
 data class RequiredArgument(override val name: String) : Argument() {
 
-    override fun parse(index: Int, rawArguments: List<String>): ParseResult<String?> {
+    override fun parse(index: Int, rawArguments: List<String>): Either<ParseErrorReason, String?> {
         val rawArgument = rawArguments.getOrNull(index)
         return if (rawArgument != null)
-            ParseResult.Success(rawArgument)
+            Either.Right(rawArgument)
         else
-            ParseResult.Error(ParseErrorReason.ARGUMENTS_NOT_ENOUGH)
+            Either.Left(ParseErrorReason.ARGUMENTS_NOT_ENOUGH)
     }
 }
 
@@ -40,8 +44,8 @@ data class RequiredArgument(override val name: String) : Argument() {
  * @property name name of this argument
  */
 data class OptionalArgument(override val name: String) : Argument() {
-    override fun parse(index: Int, rawArguments: List<String>): ParseResult<String?> {
-        return ParseResult.Success(rawArguments.getOrNull(index))
+    override fun parse(index: Int, rawArguments: List<String>): Either<ParseErrorReason, String?> {
+        return Either.Right(rawArguments.getOrNull(index))
     }
 }
 
@@ -59,14 +63,14 @@ data class LongArgument(
     val isRequired: Boolean
 ) : Argument() {
 
-    override fun parse(index: Int, rawArguments: List<String>): ParseResult<String?> {
+    override fun parse(index: Int, rawArguments: List<String>): Either<ParseErrorReason, String?> {
         if (rawArguments.getOrNull(index) == null) {
             return if (isRequired)
-                ParseResult.Error(ParseErrorReason.ARGUMENTS_NOT_ENOUGH)
+                Either.Left(ParseErrorReason.ARGUMENTS_NOT_ENOUGH)
             else
-                ParseResult.Success(null)
+                Either.Right(null)
         }
 
-        return ParseResult.Success(rawArguments.drop(index).joinToString(" "))
+        return Either.Right(rawArguments.drop(index).joinToString(" "))
     }
 }

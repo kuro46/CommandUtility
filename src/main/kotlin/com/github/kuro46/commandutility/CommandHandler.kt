@@ -1,6 +1,7 @@
 package com.github.kuro46.commandutility
 
 import com.github.kuro46.commandutility.syntax.CommandSyntax
+import com.github.kuro46.commandutility.syntax.CompletionData
 import org.bukkit.command.CommandSender
 
 abstract class CommandHandler {
@@ -20,8 +21,7 @@ abstract class CommandHandler {
         caller: CommandHandlerManager,
         sender: CommandSender,
         command: Command,
-        completedArgs: List<String>,
-        uncompletedArg: String
+        completionData: CompletionData
     ): List<String> {
         return caller.getCandiatesByCommand(command)
     }

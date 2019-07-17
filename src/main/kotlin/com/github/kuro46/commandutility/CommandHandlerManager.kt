@@ -1,6 +1,6 @@
 package com.github.kuro46.commandutility
 
-import com.github.kuro46.commandutility.syntax.ParseResult
+import arrow.core.Either
 import org.bukkit.Bukkit
 import org.bukkit.command.Command as BukkitCommand
 import org.bukkit.command.CommandExecutor
@@ -101,11 +101,14 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
         val handler = handlers[foundCommand]!!
         @Suppress("NAME_SHADOWING")
         val args = foundCommand.getArgsFromList(commandWithArgs)
-        val parseResult = handler.commandSyntax.parseArguments(args)
 
-        if (parseResult is ParseResult.Error) {
-            handleParseError(sender, parseResult.reason)
-            return
+        val parsed = when (val result = handler.commandSyntax.parse(args)) {
+            is Either.Left -> {
+                val (_, reason) = result.a
+                handleParseError(sender, reason)
+                return
+            }
+            is Either.Right -> result.b
         }
 
         validateCommandSender(sender, handler.senderType)?.let {
@@ -117,7 +120,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
             this,
             sender,
             foundCommand,
-            (parseResult as ParseResult.Success).value
+            parsed
         )
     }
 
@@ -138,16 +141,20 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
 
         val handler = handlers[command]!!
 
-        val completedArgs = if (args.isNotEmpty()) args.dropLast(1) else emptyList()
-
-        val uncompletedArg = if (args.isNotEmpty()) args.last() else ""
+        val completionData = when (val result = handler.commandSyntax.parseCompleting(args)) {
+            is Either.Left -> {
+                val reason = result.a
+                handleParseError(sender, reason)
+                return emptyList()
+            }
+            is Either.Right -> result.b
+        }
 
         return handler.handleTabComplete(
             this,
             sender,
             command,
-            completedArgs,
-            uncompletedArg
+            completionData
         )
     }
 

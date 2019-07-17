@@ -1,5 +1,8 @@
 package com.github.kuro46.commandutility.syntax
 
+import arrow.core.Either
+import com.github.kuro46.commandutility.ParseErrorReason
+
 /**
  * A CommandSyntax that expresses syntax of command.
  *
@@ -39,28 +42,60 @@ class CommandSyntax(
         validateSyntax()
     }
 
-    fun parseArguments(rawArguments: List<String>): ParseResult<Map<String, String>> {
-        val parsed = HashMap<String, String>()
-
-        arguments.forEachIndexed { index, argumentSyntax ->
-            val value = when (val result = argumentSyntax.parse(index, rawArguments)) {
-                is ParseResult.Success -> result.value
-                is ParseResult.Error -> return ParseResult.Error(result.reason)
+    fun parseCompleting(raw: List<String>): Either<ParseErrorReason, CompletionData> {
+        val spaceRemoved = raw
+            .filter { it.isNotEmpty() }
+            .let {
+                val last = raw.lastOrNull() ?: ""
+                if (last.isEmpty()) {
+                    val mutable = it.toMutableList()
+                    mutable.add("") // add dummy argument
+                    mutable
+                } else {
+                    it
+                }
             }
 
-            if (value != null) {
-                parsed[argumentSyntax.name] = value
+        val parsed = when (val result = parse(spaceRemoved)) {
+            is Either.Left -> {
+                val (_, reason) = result.a
+                return Either.left(reason)
             }
+            is Either.Right -> result.b
         }
 
-        return ParseResult.Success(parsed)
+        val notCompletedArgumentName = arguments.getOrNull(spaceRemoved.lastIndex)
+            ?.name
+            ?: arguments.last().name
+        val notCompletedArgumentValue = spaceRemoved.last()
+
+        val completionData = CompletionData(
+            parsed,
+            NotCompletedArg(
+                notCompletedArgumentName,
+                notCompletedArgumentValue
+            )
+        )
+        return Either.right(completionData)
     }
 
-    /**
-     * Returns a String representation of this syntax.
-     *
-     * @return String representation of this syntax.
-     */
+    fun parse(
+        raw: List<String>
+    ): Either<Pair<ParsedArgs, ParseErrorReason>, ParsedArgs> {
+        val parsed = HashMap<String, String>()
+
+        arguments.forEachIndexed { index, syntax ->
+            val value = when (val result = syntax.parse(index, raw)) {
+                is Either.Left -> return Either.left(Pair(parsed, result.a))
+                is Either.Right -> result.b
+            }
+
+            value?.let { parsed[syntax.name] = it }
+        }
+
+        return Either.right(parsed)
+    }
+
     override fun toString(): String {
         fun getAllInfo(): List<Argument> {
             return ArrayList<Argument>().apply {
@@ -95,3 +130,12 @@ class CommandSyntax(
         return builder.toString()
     }
 }
+
+typealias ParsedArgs = Map<String, String>
+
+data class CompletionData(
+    val completedArgs: ParsedArgs,
+    val notCompletedArg: NotCompletedArg
+)
+
+data class NotCompletedArg(val name: String, val value: String)
