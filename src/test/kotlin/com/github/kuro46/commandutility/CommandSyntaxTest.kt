@@ -7,7 +7,6 @@ import com.github.kuro46.commandutility.syntax.CommandSyntaxBuilder
 import com.github.kuro46.commandutility.syntax.CommandSyntaxException
 import com.github.kuro46.commandutility.syntax.LongArgument
 import com.github.kuro46.commandutility.syntax.OptionalArgument
-import com.github.kuro46.commandutility.syntax.ParsedArgs
 import com.github.kuro46.commandutility.syntax.RequiredArgument
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -92,9 +91,42 @@ class CommandSyntaxTest {
         assertEquals("bbb", parsedArgs["2"])
     }
 
-    private fun expectResult(
-        parser: (List<String>) -> Either<ParseErrorReason, ParsedArgs>
-    ): (ParseResult, List<String>) -> ParsedArgs? {
+    @Test
+    fun `parseCompleting test`() {
+        val expect = run {
+            val syntax = CommandSyntaxBuilder().apply {
+                addArgument(RequiredArgument("1"))
+                addArgument(RequiredArgument("2"))
+            }.build()
+            expectResult { syntax.parseCompleting(it) }
+        }
+
+        expect(
+            ParseResult.ARGUMENTS_NOT_ENOUGH,
+            listOf("aaa")
+        )
+
+        expect(
+            ParseResult.TOO_MANY_ARGUMENTS,
+            listOf("aaa", "bbb", "ccc")
+        )
+
+        val completionData = expect(
+            ParseResult.SUCCESS,
+            listOf("aaa", "bbb")
+        )!!
+
+        val completedArgs = completionData.completedArgs
+        val (name, value) = completionData.notCompletedArg
+
+        assertEquals("aaa", completedArgs["1"])
+        assertEquals("2", name)
+        assertEquals("bbb", value)
+    }
+
+    private fun <T> expectResult(
+        parser: (List<String>) -> Either<ParseErrorReason, T>
+    ): (ParseResult, List<String>) -> T? {
         return { expectedResult, argumentsToParse ->
             val either = parser(argumentsToParse)
             val actualResult = ParseResult.fromEither(either)
