@@ -81,9 +81,8 @@ data class LongArgument(
         }
 
         val dropped = rawArguments.drop(index)
-        val start = index + 1
         val end = rawArguments.lastIndex
 
-        return Either.right(Result(dropped.joinToString(" "), start..end))
+        return Either.right(Result(dropped.joinToString(" "), index..end))
     }
 }
