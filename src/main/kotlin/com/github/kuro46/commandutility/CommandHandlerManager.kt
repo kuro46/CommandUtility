@@ -103,7 +103,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
 
         val parsed = when (val result = handler.commandSyntax.parse(args)) {
             is Either.Left -> {
-                val (_, reason) = result.a
+                val reason = result.a
                 handleParseError(sender, reason)
                 return
             }

@@ -45,7 +45,7 @@ class CommandSyntax(
     fun parseCompleting(argsWithoutSpace: List<String>): Either<ParseErrorReason, CompletionData> {
         val parsed = when (val result = parse(argsWithoutSpace)) {
             is Either.Left -> {
-                val (_, reason) = result.a
+                val reason = result.a
                 return Either.left(reason)
             }
             is Either.Right -> result.b
@@ -68,13 +68,13 @@ class CommandSyntax(
 
     fun parse(
         raw: List<String>
-    ): Either<Pair<ParsedArgs, ParseErrorReason>, ParsedArgs> {
+    ): Either<ParseErrorReason, ParsedArgs> {
         val parsed = HashMap<String, String>()
 
         var lastParsedIndex = -1
         arguments.forEachIndexed { index, syntax ->
             val value = when (val result = syntax.parse(index, raw)) {
-                is Either.Left -> return Either.left(Pair(parsed, result.a))
+                is Either.Left -> return Either.left(result.a)
                 is Either.Right -> result.b
             }
 
@@ -85,7 +85,7 @@ class CommandSyntax(
         }
 
         if (lastParsedIndex != raw.lastIndex) {
-            return Either.left(Pair(parsed, ParseErrorReason.TOO_MANY_ARGUMENTS))
+            return Either.left(ParseErrorReason.TOO_MANY_ARGUMENTS)
         }
 
         return Either.right(parsed)
