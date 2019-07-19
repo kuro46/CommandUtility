@@ -20,6 +20,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
     private val handlers = CommandHandlers()
     private val commandExecutor = CommandExecutorImpl()
     private val tabCompleter = TabCompleterImpl()
+    abstract val fallbackHandler: FallbackCommandHandler
 
     fun registerHandler(command: String, handler: CommandHandler) {
         @Suppress("NAME_SHADOWING")
@@ -34,11 +35,9 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
             val bukkitCommand = Bukkit.getPluginCommand(name)
             bukkitCommand.executor = commandExecutor
             bukkitCommand.tabCompleter = tabCompleter
-            registerHandler(name, newRootCommandHandler(command))
+            registerHandler(name, fallbackHandler)
         }
     }
-
-    abstract fun newRootCommandHandler(command: Command): CommandHandler
 
     abstract fun handleCastError(sender: CommandSender, castError: CastError)
 
