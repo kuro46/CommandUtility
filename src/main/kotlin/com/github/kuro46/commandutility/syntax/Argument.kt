@@ -36,6 +36,10 @@ data class RequiredArgument(override val name: String) : Argument() {
         else
             Either.Left(ParseErrorReason.ARGUMENTS_NOT_ENOUGH)
     }
+
+    override fun toString(): String {
+        return requiredToString(name)
+    }
 }
 
 /**
@@ -46,6 +50,7 @@ data class RequiredArgument(override val name: String) : Argument() {
  * @property name name of this argument
  */
 data class OptionalArgument(override val name: String) : Argument() {
+
     override fun parse(index: Int, rawArguments: List<String>): Either<ParseErrorReason, Result?> {
         return Either.right(
             rawArguments.getOrNull(index)?.let {
@@ -55,6 +60,10 @@ data class OptionalArgument(override val name: String) : Argument() {
                 )
             }
         )
+    }
+
+    override fun toString(): String {
+        return optionalToString(name)
     }
 }
 
@@ -85,4 +94,19 @@ data class LongArgument(
 
         return Either.right(Result(dropped.joinToString(" "), index..end))
     }
+
+    override fun toString(): String {
+        return if (isRequired)
+            requiredToString(name)
+        else
+            optionalToString(name)
+    }
+}
+
+private fun requiredToString(name: String): String {
+    return "<$name>"
+}
+
+private fun optionalToString(name: String): String {
+    return "[$name]"
 }

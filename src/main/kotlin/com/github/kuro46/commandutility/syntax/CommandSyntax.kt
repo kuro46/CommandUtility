@@ -92,37 +92,7 @@ class CommandSyntax(
     }
 
     override fun toString(): String {
-        fun getAllInfo(): List<Argument> {
-            return ArrayList<Argument>().apply {
-                addAll(requiredArgs)
-                addAll(optionalArgs)
-                longArg?.let { add(it) }
-            }
-        }
-
-        fun getCharsToSurround(info: Argument): Pair<String, String> {
-            return when (info) {
-                is RequiredArgument -> Pair("<", ">")
-                is OptionalArgument -> Pair("[", "]")
-                is LongArgument -> {
-                    if (info.isRequired) Pair("<", ">") else Pair("[", "]")
-                }
-            }
-        }
-
-        val builder = StringBuilder()
-
-        for (info in getAllInfo()) {
-            if (builder.isNotEmpty()) {
-                builder.append(' ')
-            }
-
-            val (left, right) = getCharsToSurround(info)
-
-            builder.append(left).append(info.name).append(right)
-        }
-
-        return builder.toString()
+        return arguments.joinToString(" ")
     }
 }
 
