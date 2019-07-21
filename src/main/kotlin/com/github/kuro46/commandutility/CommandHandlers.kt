@@ -28,11 +28,12 @@ class CommandHandlers {
         for (command in commands) {
             var currentTree = treeRoot
             for (commandElement in command) {
-                if (!currentTree.children.containsKey(commandElement)) {
-                    currentTree.children[commandElement] = MutableCommandTreeEntry(null, currentTree)
+                val children = currentTree.children
+                if (!children.containsKey(commandElement)) {
+                    children[commandElement] = MutableCommandTreeEntry(null, currentTree)
                 }
 
-                currentTree = currentTree.children.getValue(commandElement)
+                currentTree = children.getValue(commandElement)
             }
             currentTree.command = command
         }
