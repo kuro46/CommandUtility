@@ -1,6 +1,6 @@
 日本語 | [English](docs/README_EN.md)
 
-# CommandUtility
+# CommandUtility [![CircleCI](https://circleci.com/gh/kuro46/CommandUtility.svg?style=svg)](https://circleci.com/gh/kuro46/CommandUtility)
 
 CommandUtilityは、Bukkitでのコマンド処理を改善するために開発されたライブラリです。  
 独自のコマンドハンドラを使用することで、コマンドの実行や、Tab補完機能が簡単に実装できるようになります。
