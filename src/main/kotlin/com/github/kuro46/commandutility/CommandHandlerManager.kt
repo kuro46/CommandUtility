@@ -39,6 +39,10 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
         }
     }
 
+    fun getHandlers(): Map<Command, CommandHandler> = handlers.handlersView
+
+    fun getHandlerTree(): CommandTreeEntry = handlers.handlerTree
+
     abstract fun handleCastError(sender: CommandSender, castError: CastError)
 
     abstract fun handleParseError(

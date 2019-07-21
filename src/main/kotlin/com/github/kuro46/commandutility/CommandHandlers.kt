@@ -6,6 +6,9 @@ class CommandHandlers {
 
     private val handlers = ConcurrentHashMap<Command, CommandHandler>()
 
+    val handlersView: Map<Command, CommandHandler>
+        get() = handlers
+
     var handlerTree = buildHandlerTree()
         private set
 
