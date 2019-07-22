@@ -10,7 +10,7 @@ class Command private constructor(
 ) : List<String> by command {
 
     /**
-     * Returns a list that drops size of [list].
+     * Returns a list that drops size of this.
      */
     fun getArgsFromList(list: List<String>): List<String> {
         return list.drop(size)
