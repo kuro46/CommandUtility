@@ -15,15 +15,16 @@ import org.bukkit.plugin.Plugin
  *
  * Thread-Safe
  */
-abstract class CommandHandlerManager(val plugin: Plugin) {
+abstract class CommandHandlerManager(
+    val plugin: Plugin,
+    val converters: StringConverters
+) {
 
     private val handlers = CommandHandlers()
     private val commandExecutor = CommandExecutorImpl()
     private val tabCompleter = TabCompleterImpl()
 
     abstract val fallbackHandler: FallbackCommandHandler
-
-    val converters = StringConverters()
 
     fun registerHandler(command: String, handler: CommandHandler) {
         @Suppress("NAME_SHADOWING")
