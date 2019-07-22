@@ -40,6 +40,6 @@ abstract class FallbackCommandHandler : CommandHandler() {
         command: Command,
         completionData: CompletionData
     ): List<String> {
-        return caller.getCandiatesByCommand(command)
+        return caller.getCandidatesByCommand(command)
     }
 }

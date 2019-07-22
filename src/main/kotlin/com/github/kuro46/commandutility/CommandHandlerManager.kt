@@ -53,7 +53,7 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
         error: ParseErrorReason
     )
 
-    fun getCandiatesByCommand(command: Command): List<String> {
+    fun getCandidatesByCommand(command: Command): List<String> {
         val commandWithArgs = CommandWithArgs.fromCommand(command)
         val tree = handlers.handlerTree.findTree(commandWithArgs)
 

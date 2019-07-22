@@ -53,7 +53,7 @@ class ArgumentTest {
     }
 
     @Test
-    fun `Requried LongArgument test`() {
+    fun `Required LongArgument test`() {
         val argument = LongArgument("arg1", true)
         val target = listOf("aaa", "bbb")
 

@@ -44,7 +44,7 @@ abstract class CommandHandler {
      *
      * If any of these are false, [CommandHandlerManager.handleCastError] and/or [CommandHandlerManager.handleParseError] are called and this method is not called.
      *
-     * In default implementation, this method returns list of subcommands using [CommandHandlerManager.getCandiatesByCommand]
+     * In default implementation, this method returns list of subcommands using [CommandHandlerManager.getCandidatesByCommand]
      */
     open fun handleTabComplete(
         caller: CommandHandlerManager,
@@ -52,6 +52,6 @@ abstract class CommandHandler {
         command: Command,
         completionData: CompletionData
     ): List<String> {
-        return caller.getCandiatesByCommand(command)
+        return caller.getCandidatesByCommand(command)
     }
 }
