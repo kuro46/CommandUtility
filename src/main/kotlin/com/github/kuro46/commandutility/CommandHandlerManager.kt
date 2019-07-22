@@ -46,11 +46,11 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
 
     fun getHandlerTree(): CommandTreeEntry = handlers.handlerTree
 
-    abstract fun handleCastError(sender: CommandSender, castError: CastError)
+    abstract fun handleCastError(sender: CommandSender, error: CastError)
 
     abstract fun handleParseError(
         sender: CommandSender,
-        parseError: ParseErrorReason
+        error: ParseErrorReason
     )
 
     fun getCandiatesByCommand(command: Command): List<String> {
