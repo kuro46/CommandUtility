@@ -20,7 +20,10 @@ abstract class CommandHandlerManager(val plugin: Plugin) {
     private val handlers = CommandHandlers()
     private val commandExecutor = CommandExecutorImpl()
     private val tabCompleter = TabCompleterImpl()
+
     abstract val fallbackHandler: FallbackCommandHandler
+
+    val converters = StringConverters()
 
     fun registerHandler(command: String, handler: CommandHandler) {
         @Suppress("NAME_SHADOWING")
