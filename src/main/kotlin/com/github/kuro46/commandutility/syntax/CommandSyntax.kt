@@ -79,7 +79,7 @@ class CommandSyntax(
             }
 
             if (value != null) {
-                lastParsedIndex = value.usedIndexes.endInclusive
+                lastParsedIndex = value.usedIndexes.last
                 parsed[syntax.name] = value.value
             }
         }
