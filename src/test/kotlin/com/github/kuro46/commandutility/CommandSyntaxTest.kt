@@ -151,14 +151,14 @@ class CommandSyntaxTest {
             fun fromEither(either: Either<ParseErrorReason, *>): ParseResult {
                 return when (either) {
                     is Either.Left -> fromReason(either.a)
-                    is Either.Right -> ParseResult.SUCCESS
+                    is Either.Right -> SUCCESS
                 }
             }
 
             fun fromReason(reason: ParseErrorReason): ParseResult {
                 return when (reason) {
-                    ParseErrorReason.ARGUMENTS_NOT_ENOUGH -> ParseResult.ARGUMENTS_NOT_ENOUGH
-                    ParseErrorReason.TOO_MANY_ARGUMENTS -> ParseResult.TOO_MANY_ARGUMENTS
+                    ParseErrorReason.ARGUMENTS_NOT_ENOUGH -> ARGUMENTS_NOT_ENOUGH
+                    ParseErrorReason.TOO_MANY_ARGUMENTS -> TOO_MANY_ARGUMENTS
                 }
             }
         }
