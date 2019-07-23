@@ -1,4 +1,4 @@
-package com.github.kuro46.commandutility
+package com.github.kuro46.commandutility.handle
 
 import com.github.kuro46.commandutility.syntax.CommandSyntax
 import com.github.kuro46.commandutility.syntax.CompletionData
@@ -26,12 +26,12 @@ abstract class CommandHandler {
      * - Type of [sender] is equal to [senderType]
      * - Arguments are matched with [commandSyntax]
      *
-     * If any of these are false, [CommandHandlerManager.handleCastError] and/or [CommandHandlerManager.handleParseError] are called and this method is not called.
+     * If any of these are false, [CommandManager.handleCastError] and/or [CommandManager.handleParseError] are called and this method is not called.
      */
     abstract fun handleCommand(
-        caller: CommandHandlerManager,
+        caller: CommandManager,
         sender: CommandSender,
-        command: Command,
+        commandSections: CommandSections,
         args: Map<String, String>
     )
 
@@ -47,11 +47,19 @@ abstract class CommandHandler {
      * In default implementation, this method returns list of subcommands using [CommandHandlerManager.getCandidatesByCommand]
      */
     open fun handleTabComplete(
-        caller: CommandHandlerManager,
+        caller: CommandManager,
         sender: CommandSender,
-        command: Command,
+        commandSections: CommandSections,
         completionData: CompletionData
     ): List<String> {
-        return caller.getCandidatesByCommand(command)
+        return getChildrenBySections(caller, commandSections)
+    }
+
+    fun getChildrenBySections(
+        caller: CommandManager,
+        sections: CommandSections
+    ): List<String> {
+        val tree = caller.commandTree.findTree(sections)
+        return tree.children.keys.map { it.toString() }
     }
 }

@@ -1,4 +1,4 @@
-package com.github.kuro46.commandutility
+package com.github.kuro46.commandutility.syntax
 
 enum class ParseErrorReason {
 

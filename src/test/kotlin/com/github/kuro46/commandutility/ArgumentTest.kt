@@ -3,6 +3,7 @@ package com.github.kuro46.commandutility
 import arrow.core.Either
 import com.github.kuro46.commandutility.syntax.LongArgument
 import com.github.kuro46.commandutility.syntax.OptionalArgument
+import com.github.kuro46.commandutility.syntax.ParseErrorReason
 import com.github.kuro46.commandutility.syntax.RequiredArgument
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

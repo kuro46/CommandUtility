@@ -1,4 +1,4 @@
-package com.github.kuro46.commandutility
+package com.github.kuro46.commandutility.handle
 
 import com.github.kuro46.commandutility.syntax.CommandSyntaxBuilder
 import com.github.kuro46.commandutility.syntax.CompletionData
@@ -14,32 +14,32 @@ abstract class FallbackCommandHandler : CommandHandler() {
     abstract override val senderType: CommandSenderType
 
     override fun handleCommand(
-        caller: CommandHandlerManager,
+        caller: CommandManager,
         sender: CommandSender,
-        command: Command,
+        commandSections: CommandSections,
         args: Map<String, String>
     ) {
         handleFallback(
             caller,
             sender,
-            command,
+            commandSections,
             args.getOrElse("args") { "" }.split(" ")
         )
     }
 
     abstract fun handleFallback(
-        caller: CommandHandlerManager,
+        caller: CommandManager,
         sender: CommandSender,
-        command: Command,
+        commandSections: CommandSections,
         args: List<String>
     )
 
     override fun handleTabComplete(
-        caller: CommandHandlerManager,
+        caller: CommandManager,
         sender: CommandSender,
-        command: Command,
+        commandSections: CommandSections,
         completionData: CompletionData
     ): List<String> {
-        return caller.getCandidatesByCommand(command)
+        return super.getChildrenBySections(caller, commandSections)
     }
 }

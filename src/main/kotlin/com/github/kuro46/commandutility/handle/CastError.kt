@@ -1,7 +1,7 @@
-package com.github.kuro46.commandutility
+package com.github.kuro46.commandutility.handle
 
 /**
- * A casting error used by [CommandHandlerManager]
+ * A casting error used by [CommandManager]
  */
 enum class CastError {
 

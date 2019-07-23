@@ -1,7 +1,6 @@
 package com.github.kuro46.commandutility.syntax
 
 import arrow.core.Either
-import com.github.kuro46.commandutility.ParseErrorReason
 
 /**
  * Information of an argument.
