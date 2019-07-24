@@ -7,9 +7,19 @@ package com.github.kuro46.commandutility.handle
  * @property children Children of this tree.
  */
 data class CommandTree(
-    val command: Command,
+    val command: Command?,
+    val parent: CommandTreeEntry,
     override val children: Map<CommandSection, CommandTree>
 ) : CommandTreeEntry() {
+
+    fun backWhileCommandIsNull(): CommandTreeEntry {
+        var current: CommandTreeEntry = this
+        while (current is CommandTree && current.command == null) {
+            current = current.parent
+        }
+        return current
+    }
+
     override fun toString(): String {
         return "command: '$command' chidlren: '$children'"
     }

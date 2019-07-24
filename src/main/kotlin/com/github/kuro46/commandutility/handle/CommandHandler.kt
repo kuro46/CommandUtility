@@ -44,7 +44,7 @@ abstract class CommandHandler {
      *
      * If any of these are false, [CommandHandlerManager.handleCastError] and/or [CommandHandlerManager.handleParseError] are called and this method is not called.
      *
-     * In default implementation, this method returns list of subcommands using [CommandHandlerManager.getCandidatesByCommand]
+     * In default implementation, this returns empty list.
      */
     open fun handleTabComplete(
         caller: CommandManager,
@@ -52,14 +52,6 @@ abstract class CommandHandler {
         commandSections: CommandSections,
         completionData: CompletionData
     ): List<String> {
-        return getChildrenBySections(caller, commandSections)
-    }
-
-    fun getChildrenBySections(
-        caller: CommandManager,
-        sections: CommandSections
-    ): List<String> {
-        val tree = caller.commandTree.findTree(sections)
-        return tree.children.keys.map { it.toString() }
+        return emptyList()
     }
 }

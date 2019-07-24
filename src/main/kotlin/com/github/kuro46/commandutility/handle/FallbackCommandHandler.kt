@@ -2,13 +2,13 @@ package com.github.kuro46.commandutility.handle
 
 import com.github.kuro46.commandutility.syntax.CommandSyntaxBuilder
 import com.github.kuro46.commandutility.syntax.CompletionData
-import com.github.kuro46.commandutility.syntax.LongArgument
+import com.github.kuro46.commandutility.syntax.OptionalArgument
 import org.bukkit.command.CommandSender
 
 abstract class FallbackCommandHandler : CommandHandler() {
 
     override val commandSyntax = CommandSyntaxBuilder().apply {
-        addArgument(LongArgument("args", false))
+        addArgument(OptionalArgument("args"))
     }.build()
 
     abstract override val senderType: CommandSenderType
@@ -40,6 +40,10 @@ abstract class FallbackCommandHandler : CommandHandler() {
         commandSections: CommandSections,
         completionData: CompletionData
     ): List<String> {
-        return super.getChildrenBySections(caller, commandSections)
+        return if (completionData.notCompletedArg.value.isNotEmpty()) {
+            emptyList()
+        } else {
+            caller.getCandidatesByTree(commandSections)
+        }
     }
 }

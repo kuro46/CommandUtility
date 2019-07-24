@@ -87,19 +87,22 @@ abstract class CommandManager(
         return false
     }
 
+    private fun getTreeByRawSections(rawSections: List<String>): CommandTree {
+        val sectionsToFind = CommandSections.fromStrings(rawSections)
+        return when (val treeEntry = commandTree.findTree(sectionsToFind)) {
+            is CommandTreeRoot -> throw IllegalArgumentException("'$sectionsToFind' has not registered yet.")
+            is CommandTree -> treeEntry
+        }
+    }
     private fun executeCommand(
         sender: CommandSender,
         bukkitCommand: BukkitCommand,
         args: Array<String>
     ) {
         val rawSections = listOf(bukkitCommand.name) + args
-        val command = run {
-            val sectionsToFind = CommandSections.fromStrings(rawSections)
-            when (val treeEntry = commandTree.findTree(sectionsToFind)) {
-                is CommandTreeRoot ->
-                    throw IllegalArgumentException("'$sectionsToFind' has not registered yet.")
-                is CommandTree -> treeEntry.command
-            }
+        val command = when (val entry = getTreeByRawSections(rawSections).backWhileCommandIsNull()) {
+            is CommandTreeRoot -> throw IllegalStateException("Non-null section not found! ($rawSections)")
+            is CommandTree -> entry.command!!
         }
         val handler = command.handler
 
@@ -130,33 +133,46 @@ abstract class CommandManager(
         args: Array<String>
     ): List<String> {
         val argsWithoutSpace = args
-            .filter { it.isNotEmpty() }
-            .let {
-                val last = it.lastOrNull()
-                if (last == null || last.isEmpty()) {
-                    val mutable = it.toMutableList()
-                    mutable.add("")
-                    mutable
-                } else {
-                    it
-                }
-            }
-        val rawSections = listOf(bukkitCommand.name) + argsWithoutSpace
-        val command = run {
-            val sectionsToFind = CommandSections.fromStrings(rawSections)
-            when (val treeEntry = commandTree.findTree(sectionsToFind)) {
-                is CommandTreeRoot ->
-                    throw IllegalArgumentException("'$sectionsToFind' has not registered yet.")
-                is CommandTree -> treeEntry.command
+        .filter { it.isNotEmpty() }
+        .let {
+            val last = it.lastOrNull()
+            if (last == null || last.isEmpty()) {
+                val mutable = it.toMutableList()
+                mutable.add("")
+                mutable
+            } else {
+                it
             }
         }
+        val rawSections = listOf(bukkitCommand.name) + argsWithoutSpace
+        val command = getTreeByRawSections(rawSections).command
+
+        return if (command != null) {
+            getCandidatesByHandler(sender, rawSections, command)
+        } else {
+            return getCandidatesByTree(CommandSections.fromStrings(rawSections))
+        }
+    }
+
+    fun getCandidatesByTree(sections: CommandSections): List<String> {
+        return commandTree
+        .findTree(sections)
+        .children
+        .keys
+        .map { it.toString() }
+    }
+
+    private fun getCandidatesByHandler(
+        sender: CommandSender,
+        rawSections: List<String>,
+        command: Command
+    ): List<String> {
         val handler = command.handler
+        val commandSections = command.sections
 
         if (!validateCommandSender(handler.senderType, sender)) {
             return emptyList()
         }
-
-        val commandSections = command.sections
 
         val completionData = run {
             val actualArgs = rawSections.drop(commandSections.size)

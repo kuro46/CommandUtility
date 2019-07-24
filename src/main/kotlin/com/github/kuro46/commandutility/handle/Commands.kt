@@ -65,12 +65,13 @@ private data class MutableCommandTree(
 ) : MutableCommandTreeEntry() {
     override val children: MutableMap<CommandSection, MutableCommandTree> = HashMap()
 
-    fun toImmutable(): CommandTree {
+    fun toImmutable(parent: CommandTreeEntry): CommandTree {
         val immutableChildren = hashMapOf<CommandSection, CommandTree>()
+        val tree = CommandTree(command, parent, immutableChildren)
         children.forEach { section, mutableCommandTree ->
-            immutableChildren[section] = mutableCommandTree.toImmutable()
+            immutableChildren[section] = mutableCommandTree.toImmutable(tree)
         }
-        return CommandTree(command!!, immutableChildren)
+        return tree
     }
 }
 
@@ -79,10 +80,11 @@ private class MutableCommandTreeRoot : MutableCommandTreeEntry() {
 
     fun toImmutable(): CommandTreeRoot {
         val immutableChildren = hashMapOf<CommandSection, CommandTree>()
+        val root = CommandTreeRoot(immutableChildren)
         children.forEach { section, mutableCommandTree ->
-            immutableChildren[section] = mutableCommandTree.toImmutable()
+            immutableChildren[section] = mutableCommandTree.toImmutable(root)
         }
-        return CommandTreeRoot(immutableChildren)
+        return root
     }
 }
 
