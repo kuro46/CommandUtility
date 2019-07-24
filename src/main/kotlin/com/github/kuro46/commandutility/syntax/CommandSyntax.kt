@@ -25,14 +25,18 @@ class CommandSyntax(
     init {
         fun validateSyntax() {
             if (optionalArgs.isNotEmpty() && (longArg != null && longArg.isRequired)) {
-                throw CommandSyntaxException("Some arguments are optional, but long argument is required.")
+                throw CommandSyntaxException(
+                    "Some arguments are optional, but long argument is required."
+                )
             }
 
             val names = HashSet<String>()
 
             for (argument in arguments) {
                 if (names.contains(argument.name)) {
-                    throw CommandSyntaxException("Arguments named '${argument.name}' is duplicated.")
+                    throw CommandSyntaxException(
+                        "Arguments named '${argument.name}' is duplicated."
+                    )
                 }
                 names.add(argument.name)
             }
@@ -41,7 +45,9 @@ class CommandSyntax(
         validateSyntax()
     }
 
-    fun parseCompleting(argsWithoutSpace: List<String>): Either<ParseErrorReason, CompletionData> {
+    fun parseCompleting(
+        argsWithoutSpace: List<String>
+    ): Either<ParseErrorReason, CompletionData> {
         val parsed = when (val result = parse(argsWithoutSpace)) {
             is Either.Left -> {
                 val (reason, parsed) = result.a

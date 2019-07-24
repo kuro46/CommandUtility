@@ -27,7 +27,9 @@ class StringConverters {
 
     fun <T> convert(clazz: Class<T>, sender: CommandSender, from: String): T? {
         val converter = converters[clazz]
-            ?: throw IllegalArgumentException("No converter found for class '$clazz'")
+            ?: throw IllegalArgumentException(
+                "No converter found for class '$clazz'"
+            )
 
         return converter.convert(sender, from)
             ?.let { clazz.cast(it) }

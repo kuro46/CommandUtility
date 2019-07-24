@@ -26,7 +26,9 @@ abstract class CommandHandler {
      * - Type of [sender] is equal to [senderType]
      * - Arguments are matched with [commandSyntax]
      *
-     * If any of these are false, [CommandManager.handleCastError] and/or [CommandManager.handleParseError] are called and this method is not called.
+     * If any of these are false,
+     * [CommandManager.handleCastError] and/or [CommandManager.handleParseError]
+     * are called and this method is not called.
      */
     abstract fun handleCommand(
         caller: CommandManager,
@@ -42,7 +44,9 @@ abstract class CommandHandler {
      * - Type of [sender] is equal to [senderType]
      * - Arguments are matched with [commandSyntax]
      *
-     * If any of these are false, [CommandHandlerManager.handleCastError] and/or [CommandHandlerManager.handleParseError] are called and this method is not called.
+     * If any of these are false,
+     * [CommandHandlerManager.handleCastError] and/or
+     * [CommandHandlerManager.handleParseError] are called and this method is not called.
      *
      * In default implementation, this returns empty list.
      */

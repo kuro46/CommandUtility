@@ -49,7 +49,10 @@ class ArgumentTest {
         run {
             val either = argument.parse(1, target)
             assertTrue(either.isLeft())
-            assertEquals(ParseErrorReason.ARGUMENTS_NOT_ENOUGH, (either as Either.Left).a)
+            assertEquals(
+                ParseErrorReason.ARGUMENTS_NOT_ENOUGH,
+                (either as Either.Left).a
+            )
         }
     }
 
@@ -79,7 +82,10 @@ class ArgumentTest {
         run {
             val either = argument.parse(2, target)
             assertTrue(either.isLeft())
-            assertEquals(ParseErrorReason.ARGUMENTS_NOT_ENOUGH, (either as Either.Left).a)
+            assertEquals(
+                ParseErrorReason.ARGUMENTS_NOT_ENOUGH,
+                (either as Either.Left).a
+            )
         }
     }
 

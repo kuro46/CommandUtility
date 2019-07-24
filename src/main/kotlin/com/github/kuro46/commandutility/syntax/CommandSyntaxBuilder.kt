@@ -50,7 +50,9 @@ class CommandSyntaxBuilder {
         if (prevArgument is RequiredArgument) return
 
         if (prevArgument is LongArgument) {
-            throw CommandSyntaxException("Cannot set any arguments after a long argument.")
+            throw CommandSyntaxException(
+                "Cannot set any arguments after a long argument."
+            )
         }
 
         if (prevArgument is OptionalArgument) {
@@ -59,7 +61,9 @@ class CommandSyntaxBuilder {
                     (argument is LongArgument && argument.isRequired)
 
             if (isArgumentRequired) {
-                throw CommandSyntaxException("Cannot set required arguments after optional arguments.")
+                throw CommandSyntaxException(
+                    "Cannot set required arguments after optional arguments."
+                )
             }
         }
     }

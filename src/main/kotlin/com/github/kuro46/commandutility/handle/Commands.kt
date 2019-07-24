@@ -16,7 +16,8 @@ class Commands {
     var commandTree = buildCommandTree()
         private set
 
-    fun contains(commandSections: CommandSections): Boolean = commands.containsKey(commandSections)
+    fun contains(commandSections: CommandSections): Boolean =
+        commands.containsKey(commandSections)
 
     fun put(command: Command): Command? {
         val put = commands.put(command.sections, command)
@@ -30,7 +31,8 @@ class Commands {
         return removed
     }
 
-    operator fun get(commandSections: CommandSections): Command? = commands[commandSections]
+    operator fun get(commandSections: CommandSections): Command? =
+        commands[commandSections]
 
     operator fun set(commandSections: CommandSections, command: Command) {
         commands[commandSections] = command
@@ -51,7 +53,9 @@ class Commands {
                     .getOrPut(section) { MutableCommandTree(null) }
             }
             when (entry) {
-                is MutableCommandTreeRoot -> throw IllegalStateException("Empty section found!")
+                is MutableCommandTreeRoot -> throw IllegalStateException(
+                    "Empty section found!"
+                )
                 is MutableCommandTree -> entry.command = command
             }
         }

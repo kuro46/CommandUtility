@@ -23,7 +23,10 @@ class CommandSyntaxBuilderTest {
                 builder.addArgument(argument)
             }
 
-            assertEquals("Cannot set required arguments after optional arguments.", exception.message)
+            assertEquals(
+                "Cannot set required arguments after optional arguments.",
+                exception.message
+            )
         }
 
         test(RequiredArgument("argument2"))
@@ -39,7 +42,10 @@ class CommandSyntaxBuilderTest {
             val exception = assertThrows<CommandSyntaxException> {
                 builder.addArgument(argument)
             }
-            assertEquals("Cannot set any arguments after a long argument.", exception.message)
+            assertEquals(
+                "Cannot set any arguments after a long argument.",
+                exception.message
+            )
         }
 
         val argName = "argument2"
@@ -71,12 +77,18 @@ class CommandSyntaxBuilderTest {
     fun `build a CommandSyntax`() {
         val builder = CommandSyntaxBuilder()
         for (i in 1..5) {
-            builder.addArgument(RequiredArgument(builder.arguments().size.toString()))
+            builder.addArgument(
+                RequiredArgument(builder.arguments().size.toString())
+            )
         }
         for (i in 1..5) {
-            builder.addArgument(OptionalArgument(builder.arguments().size.toString()))
+            builder.addArgument(
+                OptionalArgument(builder.arguments().size.toString())
+            )
         }
-        builder.addArgument(LongArgument(builder.arguments().size.toString(), false))
+        builder.addArgument(
+            LongArgument(builder.arguments().size.toString(), false)
+        )
 
         val syntax = builder.build()
 

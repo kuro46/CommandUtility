@@ -39,10 +39,13 @@ abstract class CommandManager(
 
         val firstSection = sections.first()
 
-        val needsRegisterFallback = !commandTree.children.containsKey(firstSection) &&
-            sections.toString() != firstSection.toString()
+        val needsRegisterFallback =
+            !commandTree.children.containsKey(firstSection) &&
+                sections.toString() != firstSection.toString()
         if (needsRegisterFallback) {
-            registerCommand(Command(CommandSections(listOf(firstSection)), fallbackHandler))
+            registerCommand(
+                Command(CommandSections(listOf(firstSection)), fallbackHandler)
+            )
         }
 
         val needsHookToBukkit = !commandTree.children.containsKey(firstSection)
@@ -58,7 +61,10 @@ abstract class CommandManager(
         return true
     }
 
-    abstract fun handleParseError(sender: CommandSender, error: ParseErrorReason)
+    abstract fun handleParseError(
+        sender: CommandSender,
+        error: ParseErrorReason
+    )
 
     abstract fun handleCastError(sender: CommandSender, error: CastError)
 
@@ -72,7 +78,10 @@ abstract class CommandManager(
             else -> CommandSenderType.ANY
         }
 
-        if (expectedType == actualType || expectedType == CommandSenderType.ANY) {
+        if (
+            expectedType == actualType ||
+            expectedType == CommandSenderType.ANY
+        ) {
             return true
         }
 
@@ -90,7 +99,9 @@ abstract class CommandManager(
     private fun getTreeByRawSections(rawSections: List<String>): CommandTree {
         val sectionsToFind = CommandSections.fromStrings(rawSections)
         return when (val treeEntry = commandTree.findTree(sectionsToFind)) {
-            is CommandTreeRoot -> throw IllegalArgumentException("'$sectionsToFind' has not registered yet.")
+            is CommandTreeRoot -> throw IllegalArgumentException(
+                "'$sectionsToFind' has not registered yet."
+            )
             is CommandTree -> treeEntry
         }
     }
@@ -100,8 +111,12 @@ abstract class CommandManager(
         args: Array<String>
     ) {
         val rawSections = listOf(bukkitCommand.name) + args
-        val command = when (val entry = getTreeByRawSections(rawSections).backWhileCommandIsNull()) {
-            is CommandTreeRoot -> throw IllegalStateException("Non-null section not found! ($rawSections)")
+        val command = when (
+            val entry = getTreeByRawSections(rawSections).backWhileCommandIsNull()
+        ) {
+            is CommandTreeRoot -> throw IllegalStateException(
+                "Non-null section not found! ($rawSections)"
+            )
             is CommandTree -> entry.command!!
         }
         val handler = command.handler

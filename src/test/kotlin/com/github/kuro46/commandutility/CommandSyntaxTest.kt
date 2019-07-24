@@ -26,7 +26,10 @@ class CommandSyntaxTest {
             )
         }
 
-        assertEquals("Some arguments are optional, but long argument is required.", exception.message)
+        assertEquals(
+            "Some arguments are optional, but long argument is required.",
+            exception.message
+        )
     }
 
     @Test
@@ -39,7 +42,10 @@ class CommandSyntaxTest {
             )
         }
 
-        assertEquals("Arguments named 'argument' is duplicated.", exception.message)
+        assertEquals(
+            "Arguments named 'argument' is duplicated.",
+            exception.message
+        )
     }
 
     @Test
@@ -56,7 +62,11 @@ class CommandSyntaxTest {
         fun testArgument(argumentFactory: (String) -> Argument) {
             test(argumentFactory("arg"))
             test(argumentFactory("arg"), argumentFactory("arg1"))
-            test(argumentFactory("arg"), argumentFactory("arg1"), argumentFactory("arg2"))
+            test(
+                argumentFactory("arg"),
+                argumentFactory("arg1"),
+                argumentFactory("arg2")
+            )
         }
 
         testArgument { RequiredArgument(it) }
