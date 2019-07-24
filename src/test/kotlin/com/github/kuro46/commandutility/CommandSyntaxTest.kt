@@ -50,7 +50,7 @@ class CommandSyntaxTest {
             arguments.forEach { builder.addArgument(it) }
             val result = builder.build().parse(target)
             assertTrue(result.isLeft())
-            val errorReason = (result as Either.Left).a
+            val (errorReason, _) = (result as Either.Left).a
             assertTrue(errorReason == ParseErrorReason.TOO_MANY_ARGUMENTS)
         }
         fun testArgument(argumentFactory: (String) -> Argument) {
@@ -63,6 +63,18 @@ class CommandSyntaxTest {
         testArgument { OptionalArgument(it) }
     }
 
+    private fun <T> errorOnly(
+        either: Either<Pair<ParseErrorReason, T>, T>
+    ): Either<ParseErrorReason, T> {
+        return when (either) {
+            is Either.Left -> {
+                val (reason, _) = either.a
+                Either.left(reason)
+            }
+            is Either.Right -> Either.right(either.b)
+        }
+    }
+
     @Test
     fun `parse test`() {
         val expect = run {
@@ -70,7 +82,7 @@ class CommandSyntaxTest {
                 addArgument(RequiredArgument("1"))
                 addArgument(RequiredArgument("2"))
             }.build()
-            expectResult { syntax.parse(it) }
+            expectResult { errorOnly(syntax.parse(it)) }
         }
 
         expect(
@@ -103,7 +115,7 @@ class CommandSyntaxTest {
         }
 
         expect(
-            ParseResult.ARGUMENTS_NOT_ENOUGH,
+            ParseResult.SUCCESS,
             listOf("aaa")
         )
 
@@ -118,11 +130,13 @@ class CommandSyntaxTest {
         )!!
 
         val completedArgs = completionData.completedArgs
-        val (name, value) = completionData.notCompletedArg
 
         assertEquals("aaa", completedArgs["1"])
-        assertEquals("2", name)
-        assertEquals("bbb", value)
+        completionData.completingArgument?.let {
+            val (name, value) = it
+            assertEquals("2", name)
+            assertEquals("bbb", value)
+        }
     }
 
     private fun <T> expectResult(

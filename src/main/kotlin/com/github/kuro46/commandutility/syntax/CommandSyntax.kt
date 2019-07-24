@@ -44,36 +44,36 @@ class CommandSyntax(
     fun parseCompleting(argsWithoutSpace: List<String>): Either<ParseErrorReason, CompletionData> {
         val parsed = when (val result = parse(argsWithoutSpace)) {
             is Either.Left -> {
-                val reason = result.a
-                return Either.left(reason)
+                val (reason, parsed) = result.a
+                if (reason == ParseErrorReason.ARGUMENTS_NOT_ENOUGH) {
+                    parsed
+                } else {
+                    return Either.left(reason)
+                }
             }
             is Either.Right -> result.b
         }
 
-        val notCompletedArgumentName = arguments.getOrNull(argsWithoutSpace.lastIndex)
-            ?.name
-            ?: arguments.last().name
-        val notCompletedArgumentValue = argsWithoutSpace.last()
+        val completingArgument = if (arguments.isNotEmpty()) {
+            val name = arguments.getOrNull(argsWithoutSpace.lastIndex)
+                ?.name
+                ?: arguments.last().name
+            val value = argsWithoutSpace.last()
+            CompletingArgument(name, value)
+        } else null
 
-        val completionData = CompletionData(
-            parsed,
-            NotCompletedArg(
-                notCompletedArgumentName,
-                notCompletedArgumentValue
-            )
-        )
-        return Either.right(completionData)
+        return Either.right(CompletionData(parsed, completingArgument))
     }
 
     fun parse(
         raw: List<String>
-    ): Either<ParseErrorReason, ParsedArgs> {
+    ): Either<Pair<ParseErrorReason, ParsedArgs>, ParsedArgs> {
         val parsed = HashMap<String, String>()
 
         var lastParsedIndex = -1
         arguments.forEachIndexed { index, syntax ->
             val value = when (val result = syntax.parse(index, raw)) {
-                is Either.Left -> return Either.left(result.a)
+                is Either.Left -> return Either.left(Pair(result.a, parsed))
                 is Either.Right -> result.b
             }
 
@@ -83,11 +83,9 @@ class CommandSyntax(
             }
         }
 
-        if (lastParsedIndex != raw.lastIndex) {
-            return Either.left(ParseErrorReason.TOO_MANY_ARGUMENTS)
-        }
-
-        return Either.right(parsed)
+        return if (lastParsedIndex != raw.lastIndex) {
+            Either.left(Pair(ParseErrorReason.TOO_MANY_ARGUMENTS, parsed))
+        } else Either.right(parsed)
     }
 
     override fun toString(): String {
@@ -99,7 +97,7 @@ typealias ParsedArgs = Map<String, String>
 
 data class CompletionData(
     val completedArgs: ParsedArgs,
-    val notCompletedArg: NotCompletedArg
+    val completingArgument: CompletingArgument?
 )
 
-data class NotCompletedArg(val name: String, val value: String)
+data class CompletingArgument(val name: String, val value: String)

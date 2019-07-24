@@ -40,7 +40,10 @@ abstract class FallbackCommandHandler : CommandHandler() {
         commandSections: CommandSections,
         completionData: CompletionData
     ): List<String> {
-        return if (completionData.notCompletedArg.value.isNotEmpty()) {
+        return if (
+            completionData.completingArgument == null ||
+            completionData.completingArgument.value.isNotEmpty()
+        ) {
             emptyList()
         } else {
             caller.getCandidatesByTree(commandSections)

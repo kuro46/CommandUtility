@@ -116,7 +116,7 @@ abstract class CommandManager(
             val actualArgs = rawSections.drop(commandSections.size)
             when (val result = handler.commandSyntax.parse(actualArgs)) {
                 is Either.Left -> {
-                    val reason = result.a
+                    val (reason, _) = result.a
                     handleParseError(sender, reason)
                     return
                 }
@@ -133,17 +133,17 @@ abstract class CommandManager(
         args: Array<String>
     ): List<String> {
         val argsWithoutSpace = args
-        .filter { it.isNotEmpty() }
-        .let {
-            val last = it.lastOrNull()
-            if (last == null || last.isEmpty()) {
-                val mutable = it.toMutableList()
-                mutable.add("")
-                mutable
-            } else {
-                it
+            .filter { it.isNotEmpty() }
+            .let {
+                val last = it.lastOrNull()
+                if (last == null || last.isEmpty()) {
+                    val mutable = it.toMutableList()
+                    mutable.add("")
+                    mutable
+                } else {
+                    it
+                }
             }
-        }
         val rawSections = listOf(bukkitCommand.name) + argsWithoutSpace
         val command = getTreeByRawSections(rawSections).command
 
@@ -156,10 +156,10 @@ abstract class CommandManager(
 
     fun getCandidatesByTree(sections: CommandSections): List<String> {
         return commandTree
-        .findTree(sections)
-        .children
-        .keys
-        .map { it.toString() }
+            .findTree(sections)
+            .children
+            .keys
+            .map { it.toString() }
     }
 
     private fun getCandidatesByHandler(
