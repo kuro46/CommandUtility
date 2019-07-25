@@ -23,6 +23,13 @@ data class CommandTree(
     override fun toString(): String {
         return "command: '$command' chidlren: '$children'"
     }
+
+    fun forEach(func: (CommandTree) -> Unit) {
+        func(this)
+        for (child in children.values) {
+            child.forEach(func)
+        }
+    }
 }
 
 /**
