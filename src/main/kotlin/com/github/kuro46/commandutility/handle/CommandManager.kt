@@ -152,7 +152,7 @@ abstract class CommandManager(
         val command = getTreeByRawSections(rawSections).command
 
         return if (command != null) {
-            getCandidatesByHandler(sender, rawSections, command)
+            getCandidatesByHandler(sender, rawSections, args, command)
         } else {
             return getCandidatesByTree(CommandSections.fromStrings(rawSections))
         }
@@ -169,6 +169,7 @@ abstract class CommandManager(
     private fun getCandidatesByHandler(
         sender: CommandSender,
         rawSections: List<String>,
+        rawArgs: Array<String>,
         command: Command
     ): List<String> {
         val handler = command.handler
@@ -181,7 +182,7 @@ abstract class CommandManager(
         val completionData = run {
             val actualArgs = rawSections.drop(commandSections.size)
                 .let {
-                    if (it.isEmpty()) {
+                    if (it.isEmpty() || rawArgs.lastOrNull()?.isEmpty() ?: false) {
                         val mutableIt = it.toMutableList()
                         mutableIt.add("")
                         mutableIt
