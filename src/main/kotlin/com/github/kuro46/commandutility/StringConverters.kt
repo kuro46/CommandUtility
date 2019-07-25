@@ -18,11 +18,39 @@ class StringConverters {
         converters[clazz] = converter
     }
 
-    inline fun <reified T> convert(sender: CommandSender, from: String): T? {
-        return convert(T::class.java, sender, from)
+    /**
+     * Converts [from] to [T].
+     *
+     * @param sender CommandSender.
+     * @param from String to convert.
+     * @param default Used if result of [StringConverter.convert] is `null`.
+     * Default value is `null`.
+     */
+    @JvmOverloads
+    inline fun <reified T> convert(
+        sender: CommandSender,
+        from: String,
+        default: T? = null
+    ): T? {
+        return convert(T::class.java, sender, from, default)
     }
 
-    fun <T> convert(clazz: Class<T>, sender: CommandSender, from: String): T? {
+    /**
+     * Converts [from] to type of [clazz].
+     *
+     * @param clazz Class.
+     * @param sender CommandSender.
+     * @param from String to convert.
+     * @param default Used if result of [StringConverter.convert] is `null`.
+     * Default value is `null`.
+     */
+    @JvmOverloads
+    fun <T> convert(
+        clazz: Class<T>,
+        sender: CommandSender,
+        from: String,
+        default: T? = null
+    ): T? {
         val converter = converters[clazz]
             ?: throw IllegalArgumentException(
                 "No converter found for class '$clazz'"
@@ -30,6 +58,7 @@ class StringConverters {
 
         return converter.convert(sender, from)
             ?.let { clazz.cast(it) }
+            ?: default
     }
 
     /**
