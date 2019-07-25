@@ -23,16 +23,15 @@ class StringConverters {
      *
      * @param sender CommandSender.
      * @param from String to convert.
-     * @param default Used if result of [StringConverter.convert] is `null`.
-     * Default value is `null`.
+     * @param ifFromIsNull Used if [from] is `null`. Default value is `null`.
      */
     @JvmOverloads
     inline fun <reified T> convert(
         sender: CommandSender,
-        from: String,
-        default: T? = null
+        from: String?,
+        ifFromIsNull: T? = null
     ): T? {
-        return convert(T::class.java, sender, from, default)
+        return convert(T::class.java, sender, from, ifFromIsNull)
     }
 
     /**
@@ -41,24 +40,25 @@ class StringConverters {
      * @param clazz Class.
      * @param sender CommandSender.
      * @param from String to convert.
-     * @param default Used if result of [StringConverter.convert] is `null`.
-     * Default value is `null`.
+     * @param ifFromIsNull Used if [from] is `null`. Default value is `null`.
      */
     @JvmOverloads
     fun <T> convert(
         clazz: Class<T>,
         sender: CommandSender,
-        from: String,
-        default: T? = null
+        from: String?,
+        ifFromIsNull: T? = null
     ): T? {
         val converter = converters[clazz]
             ?: throw IllegalArgumentException(
                 "No converter found for class '$clazz'"
             )
 
-        return converter.convert(sender, from)
-            ?.let { clazz.cast(it) }
-            ?: default
+        return if (from == null) {
+            ifFromIsNull
+        } else {
+            converter.convert(sender, from)?.let { clazz.cast(it) }
+        }
     }
 
     /**
