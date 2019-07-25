@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.github.kuro46"
-version = "0.1.0-SNAPSHOT"
+version = "0.1.0"
 
 repositories {
     mavenLocal()
