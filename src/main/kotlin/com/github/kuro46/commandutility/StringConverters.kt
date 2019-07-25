@@ -2,6 +2,7 @@ package com.github.kuro46.commandutility
 
 import java.util.concurrent.ConcurrentHashMap
 import org.bukkit.Bukkit
+import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
@@ -33,7 +34,7 @@ class StringConverters {
 
     /**
      * Registers default converters.
-     * Currently, Int, Double, Float, and Player are supported.
+     * Currently, Int, Double, Float, Player, and World are supported.
      */
     fun registerDefaults() {
 
@@ -72,6 +73,15 @@ class StringConverters {
                     sender.sendMessage("Player '$from' is not online")
                 }
                 playerOrNull
+            }
+        )
+        registerConverter(
+            StringConverter.fromLambda<World> { sender, from ->
+                val worldOrNull = Bukkit.getWorld(from)
+                if (worldOrNull == null) {
+                    sender.sendMessage("World '$from' not found")
+                }
+                worldOrNull
             }
         )
     }
