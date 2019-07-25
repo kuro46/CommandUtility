@@ -9,10 +9,6 @@ class StringConverters {
 
     private val converters = ConcurrentHashMap<Class<*>, StringConverter<*>>()
 
-    init {
-        registerDefaults()
-    }
-
     inline fun <reified T> registerConverter(converter: StringConverter<T>) {
         registerConverter(T::class.java, converter)
     }
@@ -39,7 +35,7 @@ class StringConverters {
      * Registers default converters.
      * Currently, Int, Double, Float, and Player are supported.
      */
-    private fun registerDefaults() {
+    fun registerDefaults() {
 
         registerConverter(
             StringConverter.fromLambda<Int> { sender, from ->
