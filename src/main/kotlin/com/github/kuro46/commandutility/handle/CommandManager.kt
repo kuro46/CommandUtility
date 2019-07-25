@@ -147,18 +147,7 @@ abstract class CommandManager(
         bukkitCommand: BukkitCommand,
         args: Array<String>
     ): List<String> {
-        val argsWithoutSpace = args
-            .filter { it.isNotEmpty() }
-            .let {
-                val last = it.lastOrNull()
-                if (last == null || last.isEmpty()) {
-                    val mutable = it.toMutableList()
-                    mutable.add("")
-                    mutable
-                } else {
-                    it
-                }
-            }
+        val argsWithoutSpace = args.filter { it.isNotEmpty() }
         val rawSections = listOf(bukkitCommand.name) + argsWithoutSpace
         val command = getTreeByRawSections(rawSections).command
 
@@ -191,6 +180,13 @@ abstract class CommandManager(
 
         val completionData = run {
             val actualArgs = rawSections.drop(commandSections.size)
+                .let {
+                    if (it.isEmpty()) {
+                        val mutableIt = it.toMutableList()
+                        mutableIt.add("")
+                        mutableIt
+                    } else it
+                }
             when (val result = handler.commandSyntax.parseCompleting(actualArgs)) {
                 is Either.Left -> {
                     val reason = result.a
