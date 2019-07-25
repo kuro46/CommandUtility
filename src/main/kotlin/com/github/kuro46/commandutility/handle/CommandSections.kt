@@ -42,6 +42,7 @@ data class CommandSections(
 
     companion object {
 
+        @JvmStatic
         fun fromStrings(strings: Iterable<String>): CommandSections {
             return CommandSections(strings.map { CommandSection(it) })
         }

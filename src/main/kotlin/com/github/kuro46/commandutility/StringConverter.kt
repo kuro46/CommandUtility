@@ -8,6 +8,7 @@ interface StringConverter<T> {
 
     companion object {
 
+        @JvmStatic
         fun <T> fromLambda(
             func: (CommandSender, String) -> T?
         ): StringConverter<T> {

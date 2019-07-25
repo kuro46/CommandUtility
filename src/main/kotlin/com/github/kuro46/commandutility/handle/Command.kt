@@ -6,7 +6,7 @@ package com.github.kuro46.commandutility.handle
  * @property handler Handler of this command.
  * @property description Description of this command. Default is `null`.
  */
-class Command(
+class Command @JvmOverloads constructor(
     val sections: CommandSections,
     val handler: CommandHandler,
     val description: String? = null
