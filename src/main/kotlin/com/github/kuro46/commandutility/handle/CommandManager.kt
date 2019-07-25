@@ -154,16 +154,18 @@ abstract class CommandManager(
         return if (command != null) {
             getCandidatesByHandler(sender, rawSections, args, command)
         } else {
-            return getCandidatesByTree(CommandSections.fromStrings(rawSections))
+            val completing = args.lastOrNull() ?: ""
+            getCandidatesByTree(CommandSections.fromStrings(rawSections), completing)
         }
     }
 
-    fun getCandidatesByTree(sections: CommandSections): List<String> {
+    fun getCandidatesByTree(sections: CommandSections, completing: String): List<String> {
         return commandTree
             .findTree(sections)
             .children
             .keys
             .map { it.toString() }
+            .filter { it.startsWith(completing, true) }
     }
 
     private fun getCandidatesByHandler(

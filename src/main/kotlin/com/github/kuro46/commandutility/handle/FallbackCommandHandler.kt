@@ -44,7 +44,7 @@ abstract class FallbackCommandHandler : CommandHandler() {
             // If all arguments are completed.
             emptyList()
         } else {
-            caller.getCandidatesByTree(commandSections)
+            caller.getCandidatesByTree(commandSections, completionData.completingArgument.value)
         }
     }
 }
