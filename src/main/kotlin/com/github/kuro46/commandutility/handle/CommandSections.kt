@@ -46,5 +46,10 @@ data class CommandSections(
         fun fromStringSections(strings: Iterable<String>): CommandSections {
             return CommandSections(strings.map { CommandSection(it) })
         }
+
+        @JvmStatic
+        fun fromString(string: String): CommandSections {
+            return fromStringSections(string.split(" "))
+        }
     }
 }
