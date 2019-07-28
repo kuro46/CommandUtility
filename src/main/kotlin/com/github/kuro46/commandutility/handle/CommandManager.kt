@@ -97,7 +97,7 @@ abstract class CommandManager(
     }
 
     private fun getTreeByRawSections(rawSections: List<String>): CommandTree {
-        val sectionsToFind = CommandSections.fromStrings(rawSections)
+        val sectionsToFind = CommandSections.fromStringSections(rawSections)
         return when (val treeEntry = commandTree.findTree(sectionsToFind)) {
             is CommandTreeRoot -> throw IllegalArgumentException(
                 "'$sectionsToFind' has not registered yet."
@@ -155,7 +155,7 @@ abstract class CommandManager(
             getCandidatesByHandler(sender, rawSections, args, command)
         } else {
             val completing = args.lastOrNull() ?: ""
-            getCandidatesByTree(CommandSections.fromStrings(rawSections), completing)
+            getCandidatesByTree(CommandSections.fromStringSections(rawSections), completing)
         }
     }
 

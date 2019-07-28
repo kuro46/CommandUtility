@@ -5,24 +5,28 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version "1.0.0-RC16"
     id("org.jlleitschuh.gradle.ktlint") version "8.1.0"
     id("org.jetbrains.dokka") version "0.9.18"
-    java
+    `java-library`
     maven
 }
 
 group = "com.github.kuro46"
-version = "0.2.1"
+version = "0.3.0"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 repositories {
-    mavenLocal()
     jcenter()
     mavenCentral()
+    maven("https://dl.bintray.com/arrow-kt/arrow-kt/")
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
 }
 
 dependencies {
     compileOnly("org.bukkit", "bukkit", "1.12.2-R0.1-SNAPSHOT")
-    implementation(kotlin("stdlib-jdk8"))
+    api(kotlin("stdlib-jdk8"))
     implementation("io.arrow-kt", "arrow-core-data", "0.9.0")
     testImplementation("org.junit.jupiter", "junit-jupiter", "5.5.0")
 }
@@ -40,8 +44,4 @@ tasks.test {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-}
-
-tasks.withType<Wrapper> {
-    distributionType = Wrapper.DistributionType.ALL
 }

@@ -11,27 +11,6 @@ CommandUtilityは、Bukkitでのコマンド処理を改善するために開発
 
 注意: このライブラリはプラグインではないため、必ずshadeプラグインなどでjarファイル内に格納してください。  
 
-また、無ければKotlinを依存関係に追加してください。
-
-```kotlin
-// build.gradle.kts
-implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", "1.3.41")
-```
-
-```groovy
-// build.gradle
-implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.41'
-```
-
-```xml
-// pom.xml
-<dependency>
-    <groupId>org.jetbrains.kotlin</groupId>
-    <artifactId>kotlin-stdlib-jdk8</artifactId>
-    <version>1.3.41</version>
-</dependency>
-```
-
 ## 使用例
 
 [このリポジトリ](https://github.com/kuro46/CommandUtilityExample)を参照してください。
