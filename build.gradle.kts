@@ -18,11 +18,10 @@ java {
 }
 
 repositories {
-    mavenLocal()
     jcenter()
     mavenCentral()
+    maven("https://dl.bintray.com/arrow-kt/arrow-kt/")
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    maven("https://oss.sonatype.org/content/repositories/snapshots")
 }
 
 dependencies {
