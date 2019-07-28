@@ -1,10 +1,11 @@
 package com.github.kuro46.commandutility.handle
 
 import com.github.kuro46.commandutility.syntax.CommandSyntaxBuilder
+import com.github.kuro46.commandutility.syntax.CompletionData
 import com.github.kuro46.commandutility.syntax.LongArgument
 import org.bukkit.command.CommandSender
 
-open class HelpCommandHandler(val sectionsToSend: CommandSections) : CommandHandler() {
+open class HelpCommandHandler(val rootSections: CommandSections) : CommandHandler() {
 
     override val commandSyntax = CommandSyntaxBuilder().apply {
         addArgument(LongArgument("children", false))
@@ -18,7 +19,7 @@ open class HelpCommandHandler(val sectionsToSend: CommandSections) : CommandHand
         commandSections: CommandSections,
         args: Map<String, String>
     ) {
-        val sections = sectionsToSend.let {
+        val sections = rootSections.let {
             if (args.containsKey("children")) {
                 val childrenSections = CommandSections.fromString(args.getValue("children"))
                 CommandSections(it + childrenSections)
@@ -46,6 +47,25 @@ open class HelpCommandHandler(val sectionsToSend: CommandSections) : CommandHand
         if (command.handler is FallbackCommandHandler) return null
         val description = command.description ?: "No description provided"
         return "/${command.sections} ${command.handler.commandSyntax} - $description"
+    }
+
+    override fun handleTabComplete(
+        caller: CommandManager,
+        sender: CommandSender,
+        commandSections: CommandSections,
+        completionData: CompletionData
+    ): List<String> {
+        val completing = completionData.completedArgs.getValue("children")
+        val additionalSections = CommandSections.fromString(completing)
+
+        val adddedSections = CommandSections(rootSections + additionalSections)
+
+        return caller
+            .commandTree
+            .findTree(adddedSections)
+            .children
+            .keys
+            .map { it.toString() }
     }
 }
 
