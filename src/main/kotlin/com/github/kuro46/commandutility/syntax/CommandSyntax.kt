@@ -64,7 +64,7 @@ class CommandSyntax(
             val name = arguments.getOrNull(argsWithoutSpace.lastIndex)
                 ?.name
                 ?: arguments.last().name
-            val value = argsWithoutSpace.last()
+            val value = parsed.getValue(name)
             CompletingArgument(name, value)
         } else null
 
