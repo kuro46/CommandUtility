@@ -1,11 +1,14 @@
 package com.github.kuro46.commandutility.handle
 
 import com.github.kuro46.commandutility.syntax.CommandSyntaxBuilder
+import com.github.kuro46.commandutility.syntax.LongArgument
 import org.bukkit.command.CommandSender
 
 open class HelpCommandHandler(val sectionsToSend: CommandSections) : CommandHandler() {
 
-    override val commandSyntax = CommandSyntaxBuilder().build()
+    override val commandSyntax = CommandSyntaxBuilder().apply {
+        addArgument(LongArgument("children", false))
+    }.build()
 
     override val senderType = CommandSenderType.ANY
 
@@ -15,21 +18,27 @@ open class HelpCommandHandler(val sectionsToSend: CommandSections) : CommandHand
         commandSections: CommandSections,
         args: Map<String, String>
     ) {
-        val commandTreeEntry = caller.commandTree.findTree(sectionsToSend)
+        val sections = sectionsToSend.let {
+            if (args.containsKey("children")) {
+                val childrenSections = CommandSections.fromString(args.getValue("children"))
+                CommandSections(it + childrenSections)
+            } else it
+        }
+        val commandTreeEntry = caller.commandTree.findTree(sections)
         val commandTree = when (commandTreeEntry) {
             is CommandTreeRoot -> throw IllegalArgumentException("Tree: '$commandSections' not found!")
             is CommandTree -> commandTreeEntry
         }
-        sender.sendMessageIfNonNull(createFirstLine(sectionsToSend))
+        sender.sendMessageIfNonNull(createFirstLine(sections))
         commandTree.forEach {
             val command = it.command ?: return@forEach
             sender.sendMessageIfNonNull(createCommandLine(command))
         }
-        sender.sendMessageIfNonNull(createLastLine(sectionsToSend))
+        sender.sendMessageIfNonNull(createLastLine(sections))
     }
 
     open fun createFirstLine(sections: CommandSections): String? =
-        "Help for $sections ----------"
+        "Help for '$sections' ----------"
 
     open fun createLastLine(sections: CommandSections): String? = null
 
