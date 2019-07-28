@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.github.kuro46"
-version = "0.3.0-SNAPSHOT"
+version = "0.3.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
