@@ -27,7 +27,7 @@ repositories {
 dependencies {
     compileOnly("org.bukkit", "bukkit", "1.12.2-R0.1-SNAPSHOT")
     api(kotlin("stdlib-jdk8"))
-    implementation("io.arrow-kt", "arrow-core-data", "0.9.0")
+    api("io.arrow-kt", "arrow-core-data", "0.9.0")
     testImplementation("org.junit.jupiter", "junit-jupiter", "5.5.0")
 }
 
