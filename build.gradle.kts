@@ -1,9 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.41"
-    id("io.gitlab.arturbosch.detekt") version "1.0.0-RC16"
-    id("org.jlleitschuh.gradle.ktlint") version "8.1.0"
+    kotlin("jvm") version "1.3.50"
+    id("io.gitlab.arturbosch.detekt") version "1.0.1"
+    id("org.jlleitschuh.gradle.ktlint") version "8.2.0"
     id("org.jetbrains.dokka") version "0.9.18"
     `java-library`
     maven
@@ -28,7 +28,7 @@ dependencies {
     compileOnly("org.bukkit", "bukkit", "1.12.2-R0.1-SNAPSHOT")
     api(kotlin("stdlib-jdk8"))
     api("io.arrow-kt", "arrow-core-data", "0.9.0")
-    testImplementation("org.junit.jupiter", "junit-jupiter", "5.5.0")
+    testImplementation("org.junit.jupiter", "junit-jupiter", "5.5.1")
 }
 
 ktlint {
