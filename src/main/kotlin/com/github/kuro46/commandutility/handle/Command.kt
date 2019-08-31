@@ -35,4 +35,10 @@ class Command @JvmOverloads constructor(
     override fun toString(): String {
         return sections.toString()
     }
+
+    companion object {
+
+        @JvmStatic
+        fun builder(): CommandBuilder = CommandBuilder()
+    }
 }
