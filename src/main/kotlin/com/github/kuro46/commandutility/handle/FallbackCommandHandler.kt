@@ -47,4 +47,10 @@ abstract class FallbackCommandHandler : CommandHandler() {
             caller.getCandidatesByTree(commandSections, completionData.completingArgument.value)
         }
     }
+
+    companion object {
+
+        @JvmStatic
+        fun builder(): FallbackHandlerBuilder = FallbackHandlerBuilder()
+    }
 }
