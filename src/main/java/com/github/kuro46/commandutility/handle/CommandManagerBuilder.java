@@ -2,6 +2,7 @@ package com.github.kuro46.commandutility.handle;
 
 import com.github.kuro46.commandutility.StringConverters;
 import com.github.kuro46.commandutility.syntax.ParseErrorReason;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import org.bukkit.command.CommandSender;
 
@@ -18,27 +19,40 @@ public final class CommandManagerBuilder {
 
     public CommandManagerBuilder parseErrorHandler(
             final BiConsumer<CommandSender, ParseErrorReason> parseErrorHandler) {
+        Objects.requireNonNull(parseErrorHandler, "'parseErrorHandler' cannot be null");
+
         this.parseErrorHandler = parseErrorHandler;
         return this;
     }
 
     public CommandManagerBuilder castErrorHandler(
             final BiConsumer<CommandSender, CastError> castErrorHandler) {
+        Objects.requireNonNull(castErrorHandler, "'castErrorHandler' cannot be null");
+
         this.castErrorHandler = castErrorHandler;
         return this;
     }
 
     public CommandManagerBuilder fallbackHandler(final FallbackCommandHandler fallbackHandler) {
+        Objects.requireNonNull(fallbackHandler, "'fallbackHandler' cannot be null");
+
         this.fallbackHandler = fallbackHandler;
         return this;
     }
 
     public CommandManagerBuilder converters(final StringConverters converters) {
+        Objects.requireNonNull(converters, "'converters' cannot be null");
+
         this.converters = converters;
         return this;
     }
 
     public CommandManager build() {
+        Objects.requireNonNull(fallbackHandler, "'fallbackHandler' cannot be null");
+        Objects.requireNonNull(converters, "'converters' cannot be null");
+        Objects.requireNonNull(parseErrorHandler, "'parseErrorHandler' cannot be null");
+        Objects.requireNonNull(castErrorHandler, "'castErrorHandler' cannot be null");
+
         return new CommandManager(fallbackHandler, converters) {
 
             @Override
