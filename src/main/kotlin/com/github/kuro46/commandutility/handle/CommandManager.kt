@@ -229,4 +229,10 @@ abstract class CommandManager(
             return executeTabComplete(sender, command, args)
         }
     }
+
+    companion object {
+
+        @JvmStatic
+        fun builder(): CommandManagerBuilder = CommandManagerBuilder()
+    }
 }
