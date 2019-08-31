@@ -58,4 +58,10 @@ abstract class CommandHandler {
     ): List<String> {
         return emptyList()
     }
+
+    companion object {
+
+        @JvmStatic
+        fun builder(): CommandHandlerBuilder = CommandHandlerBuilder()
+    }
 }
