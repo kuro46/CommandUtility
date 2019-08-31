@@ -5,6 +5,8 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version "1.0.1"
     id("org.jlleitschuh.gradle.ktlint") version "8.2.0"
     id("org.jetbrains.dokka") version "0.9.18"
+//    id("com.github.spotbugs") version "2.0.0"
+    checkstyle
     `java-library`
     maven
 }
@@ -45,3 +47,15 @@ tasks.test {
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
+
+// SpotBugs settings
+
+// tasks.withType<com.github.spotbugs.SpotBugsTask> {
+//     sourceSets {
+//         getByName("main").java.srcDirs("src/main/java")
+//         getByName("test").java.srcDirs("src/test/java")
+//     }
+//
+//     reports.getXml().setEnabled(false)
+//     reports.getHtml().setEnabled(true)
+// }
