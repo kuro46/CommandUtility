@@ -84,6 +84,14 @@ public final class CommandHandlerBuilder {
         };
     }
 
+    public void register(final CommandManager manager, final String sections) {
+        register(manager, CommandSections.fromString(sections));
+    }
+
+    public void register(final CommandManager manager, final CommandSections sections) {
+        manager.registerCommand(new Command(sections, build()));
+    }
+
     @FunctionalInterface
     public interface Handler {
 
