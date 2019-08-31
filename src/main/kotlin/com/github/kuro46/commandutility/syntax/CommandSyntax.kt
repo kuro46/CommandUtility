@@ -97,6 +97,12 @@ class CommandSyntax(
     override fun toString(): String {
         return arguments.joinToString(" ")
     }
+
+    companion object {
+
+        @JvmStatic
+        fun builder(): CommandSyntaxBuilder = CommandSyntaxBuilder()
+    }
 }
 
 typealias ParsedArgs = Map<String, String>
