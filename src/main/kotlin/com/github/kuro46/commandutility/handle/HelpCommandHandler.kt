@@ -44,7 +44,6 @@ open class HelpCommandHandler(val rootSections: CommandSections) : CommandHandle
     open fun createLastLine(sections: CommandSections): String? = null
 
     open fun createCommandLine(command: Command): String? {
-        if (command.handler is FallbackCommandHandler) return null
         val description = command.description ?: "No description provided"
         return "/${command.sections} ${command.handler.commandSyntax} - $description"
     }

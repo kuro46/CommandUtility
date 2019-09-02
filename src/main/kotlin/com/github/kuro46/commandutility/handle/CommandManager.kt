@@ -11,7 +11,6 @@ import org.bukkit.command.TabExecutor
 import org.bukkit.entity.Player
 
 abstract class CommandManager(
-    val fallbackHandler: FallbackCommandHandler,
     val stringConverters: StringConverters
 ) {
 
@@ -38,15 +37,6 @@ abstract class CommandManager(
         }
 
         val firstSection = sections.first()
-
-        val needsRegisterFallback =
-            !commandTree.children.containsKey(firstSection) &&
-                sections.toString() != firstSection.toString()
-        if (needsRegisterFallback) {
-            registerCommand(
-                Command(CommandSections(listOf(firstSection)), fallbackHandler)
-            )
-        }
 
         val needsHookToBukkit = !commandTree.children.containsKey(firstSection)
 
@@ -105,6 +95,7 @@ abstract class CommandManager(
             is CommandTree -> treeEntry
         }
     }
+
     private fun executeCommand(
         sender: CommandSender,
         bukkitCommand: BukkitCommand,

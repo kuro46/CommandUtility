@@ -10,7 +10,6 @@ public final class CommandManagerBuilder {
 
     private BiConsumer<CommandSender, ParseErrorReason> parseErrorHandler;
     private BiConsumer<CommandSender, CastError> castErrorHandler;
-    private FallbackCommandHandler fallbackHandler;
     private StringConverters converters = new StringConverters();
 
     public CommandManagerBuilder() {
@@ -33,13 +32,6 @@ public final class CommandManagerBuilder {
         return this;
     }
 
-    public CommandManagerBuilder fallbackHandler(final FallbackCommandHandler fallbackHandler) {
-        Objects.requireNonNull(fallbackHandler, "'fallbackHandler' cannot be null");
-
-        this.fallbackHandler = fallbackHandler;
-        return this;
-    }
-
     public CommandManagerBuilder converters(final StringConverters converters) {
         Objects.requireNonNull(converters, "'converters' cannot be null");
 
@@ -48,12 +40,11 @@ public final class CommandManagerBuilder {
     }
 
     public CommandManager build() {
-        Objects.requireNonNull(fallbackHandler, "'fallbackHandler' cannot be null");
         Objects.requireNonNull(converters, "'converters' cannot be null");
         Objects.requireNonNull(parseErrorHandler, "'parseErrorHandler' cannot be null");
         Objects.requireNonNull(castErrorHandler, "'castErrorHandler' cannot be null");
 
-        return new CommandManager(fallbackHandler, converters) {
+        return new CommandManager(converters) {
 
             @Override
             public void handleParseError(
