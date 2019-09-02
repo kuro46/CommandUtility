@@ -11,8 +11,8 @@ import org.bukkit.command.CommandSender;
 
 public final class CommandHandlerBuilder {
 
-    private CommandSyntax syntax;
-    private CommandSenderType senderType;
+    private CommandSyntax syntax = CommandSyntax.builder().build();
+    private CommandSenderType senderType = CommandSenderType.ANY;
     private Handler handler;
     private Completer completer = (caller, sender, sections, completionData) -> {
         return Collections.emptyList();
