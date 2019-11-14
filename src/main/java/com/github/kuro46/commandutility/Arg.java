@@ -1,40 +1,30 @@
 package com.github.kuro46.commandutility;
 
-import java.util.Formattable;
-import java.util.Formatter;
-import lombok.ToString;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NonNull;
 
 /**
- * A representation of an argument.
- * <p>
- * <pre>{@code
- * Arg arg1 = new Arg("argument name", true, null");
- * Arg arg2 = new Arg("argument name", true);
- * assertEquals(arg1, arg2);
- * }</pre>
+ * A representation of an argument.<br>
+ * This class only contains name and necessity. Not includes value.<br>
+ *
+ * @see ParsedArgs
  */
-@ToString
-public final class Arg implements Formattable {
+@AllArgsConstructor
+public final class Arg {
 
-    private final ArgName name;
+    /**
+     * Name of this argument
+     */
+    @Getter
+    @NonNull
+    private final String name;
+
+    /**
+     * Necessity of this argument. {@code true} if this argument is necessary
+     */
+    @Getter
     private final boolean required;
-
-    public Arg(final String name, final boolean required) {
-        this.name = ArgName.of(name);
-        this.required = required;
-    }
-
-    public ArgName getName() {
-        return name;
-    }
-
-    public boolean isRequired() {
-        return required;
-    }
-
-    public boolean isOptional() {
-        return !required;
-    }
 
     @Override
     public boolean equals(final Object other) {
@@ -42,7 +32,6 @@ public final class Arg implements Formattable {
             return false;
         }
         final Arg castedOther = (Arg) other;
-
         return name.equals(castedOther.name);
     }
 
@@ -52,16 +41,10 @@ public final class Arg implements Formattable {
     }
 
     @Override
-    public void formatTo(
-            final Formatter formatter,
-            final int flags,
-            final int width,
-            final int precision) {
-        if (name.toString().isEmpty()) {
-            return;
-        }
-        final char begin = isRequired() ? '<' : '[';
-        final char end = isRequired() ? '>' : ']';
-        formatter.format("%s%s%s", begin, name, end);
+    public String toString() {
+        final char[] surroundWith = required
+            ? new char[] {'<', '>'}
+            : new char[] {'[', ']'};
+        return surroundWith[0] + name + surroundWith[1];
     }
 }

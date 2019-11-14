@@ -8,31 +8,15 @@ import lombok.ToString;
 
 /**
  * A representation of parsed args
- * <p>
- * <pre>{@code
- * Args args = Args.builder()
- *     .required("first")
- *     .optional("second")
- *     .build();
- * ParsedArgs parsed = args.parse(Arrays.asList("foo"));
- *
- * parsed.getOrFail("second"); // => throws IllegalArgumentException
- * parsed.getOrNull("second"); // => null
- * parsed.get("second"); // => Optional.empty()
- *
- * parsed.getOrNull("first"); // => "first"
- * parsed.getOrFail("first"); // => "first"
- * parsed.get("first").get(); // => "first"
- * }</pre>
  */
 @ToString
 public final class ParsedArgs {
 
     @NonNull
-    private final ImmutableMap<ArgName, String> args;
+    private final ImmutableMap<String, String> map;
 
-    public ParsedArgs(@NonNull final Map<ArgName, String> args) {
-        this.args = ImmutableMap.copyOf(args);
+    public ParsedArgs(@NonNull final Map<String, String> map) {
+        this.map = ImmutableMap.copyOf(map);
     }
 
     public static Builder builder() {
@@ -40,7 +24,7 @@ public final class ParsedArgs {
     }
 
     public Optional<String> get(final String name) {
-        return Optional.ofNullable(args.get(ArgName.of(name)));
+        return Optional.ofNullable(map.get(name));
     }
 
     public String getOrNull(final String name) {
@@ -54,21 +38,16 @@ public final class ParsedArgs {
         });
     }
 
-    public ImmutableMap<ArgName, String> asMap() {
-        return args;
+    public ImmutableMap<String, String> asMap() {
+        return map;
     }
 
     public static class Builder {
 
-        private final ImmutableMap.Builder<ArgName, String> args = ImmutableMap.builder();
+        private final ImmutableMap.Builder<String, String> args = ImmutableMap.builder();
 
         public Builder put(@NonNull final String name, @NonNull final String value) {
-            return put(ArgName.of(name), value);
-        }
-
-        public Builder put(@NonNull final ArgName name, @NonNull final String value) {
             args.put(name, value);
-
             return this;
         }
 

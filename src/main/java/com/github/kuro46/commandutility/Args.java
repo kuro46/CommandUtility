@@ -2,10 +2,9 @@ package com.github.kuro46.commandutility;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.UnmodifiableIterator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Formattable;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,31 +13,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
-import lombok.ToString;
 
 /**
  * List of arguments.
- * <p>
- * <pre>{@code
- * Args args = Args.builder()
- *     .required("reqArg1")
- *     .required("reqArg2")
- *     .optional("optArg1")
- *     .build();
- * assertEquals(String.format("%s", args), "<reqArg1> <reqArg2> [optArg1]");
- *
- * Optional<ParsedArgs> parsed = args.parse(Arrays.asList("foo", "bar", "2000"));
- * assertTrue(parsed.isPresent());
- *
- * Optional<ParsedArgs> parsed = args.parse(Arrays.asList("foo", "bar"));
- * assertTrue(parsed.isPresent());
- *
- * Optional<ParsedArgs> parsed = args.parse(Arrays.asList("foo"));
- * assertFalse(parsed.isPresent());
- * }</pre>
  */
-@ToString
-public final class Args implements Formattable {
+public final class Args implements Iterable<Arg> {
 
     private static final Args EMPTY = new Args(ImmutableList.of());
 
@@ -54,73 +33,66 @@ public final class Args implements Formattable {
         return EMPTY;
     }
 
-    public ImmutableList<Arg> asList() {
-        return args;
+    public static Builder builder() {
+        return new Builder();
     }
 
     private static void validate(final List<Arg> args) {
         // Checks duplication
-
-        final Set<ArgName> names = new HashSet<>();
+        final Set<String> names = new HashSet<>();
         for (final Arg arg : args) {
-            final ArgName name = arg.getName();
+            final String name = arg.getName();
             if (!names.add(name)) {
                 final String message = String.format("Duplicated argument: %s", name);
                 throw new IllegalArgumentException(message);
             }
         }
-
         // Validates argument order
-
         boolean prevIsRequired = true;
         for (final Arg arg : args) {
             final boolean currentIsRequired = arg.isRequired();
-
             if (currentIsRequired && !prevIsRequired) {
                 throw new IllegalArgumentException("Invalid argument order");
             }
-
             prevIsRequired = arg.isRequired();
         }
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public ImmutableList<Arg> asList() {
+        return args;
+    }
+
+    @Override
+    public UnmodifiableIterator<Arg> iterator() {
+        return args.iterator();
     }
 
     public Optional<ParsedArgs> parse(final List<String> raw) {
         return new Parser().parse(raw);
     }
 
-    // TODO: access methods
-
     @Override
-    public void formatTo(
-            final Formatter formatter,
-            final int flags,
-            final int width,
-            final int precision) {
-        final String appended = args.stream()
+    public String toString() {
+        return args.stream()
             .map(arg -> String.format("%s", arg))
             .collect(Collectors.joining(" "));
-        formatter.format("%s", appended);
     }
 
     private class Parser {
 
         public Optional<ParsedArgs> parse(final List<String> raw) {
             if (args.isEmpty()) return Optional.of(new ParsedArgs(Collections.emptyMap()));
-            final List<Pair<ArgName, String>> preparsed = preparse(raw).orElse(null);
+            final List<Pair<String, String>> preparsed = preparse(raw).orElse(null);
             if (preparsed == null) {
                 return Optional.empty();
             }
-            final Map<ArgName, String> squashed = squash(preparsed);
+            final Map<String, String> squashed = squash(preparsed);
 
             return Optional.of(new ParsedArgs(squashed));
         }
 
-        private Optional<List<Pair<ArgName, String>>> preparse(final List<String> parts) {
-            final List<Pair<ArgName, String>> preparsed = new ArrayList<>();
+        private Optional<List<Pair<String, String>>> preparse(final List<String> parts) {
+            final List<Pair<String, String>> preparsed = new ArrayList<>();
             int index = 0;
             Arg prevArg = null;
             while (true) {
@@ -147,11 +119,11 @@ public final class Args implements Formattable {
             return Optional.of(preparsed);
         }
 
-        private Map<ArgName, String> squash(final List<Pair<ArgName, String>> preparsed) {
-            final Map<ArgName, String> squashed = new HashMap<>();
+        private Map<String, String> squash(final List<Pair<String, String>> preparsed) {
+            final Map<String, String> squashed = new HashMap<>();
 
-            for (final Pair<ArgName, String> pair : preparsed) {
-                final ArgName name = pair.left;
+            for (final Pair<String, String> pair : preparsed) {
+                final String name = pair.left;
                 final String value = pair.right;
                 if (!squashed.containsKey(name)) {
                     squashed.put(name, value);

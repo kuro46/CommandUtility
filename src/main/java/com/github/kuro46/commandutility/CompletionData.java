@@ -23,7 +23,7 @@ public final class CompletionData {
     private final CommandSender dispatcher;
     @NonNull
     @Getter
-    private final ArgName argName;
+    private final String argName;
     @NonNull
     @Getter
     private final String currentValue;
