@@ -6,14 +6,14 @@ import org.junit.jupiter.api.Test;
 class ArgTests {
 
     @Test
-    void testEquality() {
+    void equalityTest() {
         final Arg reqArg = new Arg("foo", true);
         final Arg optArg = new Arg("foo", false);
         Assertions.assertEquals(reqArg, optArg);
     }
 
     @Test
-    void testToString() {
+    void toStringTest() {
         final Arg reqArg = new Arg("foo", true);
         Assertions.assertEquals(reqArg.toString(), "<foo>");
         final Arg optArg = new Arg("bar", false);

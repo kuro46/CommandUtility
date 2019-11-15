@@ -18,6 +18,7 @@ repositories {
 
 dependencies {
     compileOnly 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
+    testImplementation 'org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.5.2'
     // ErrorProne
     errorprone 'com.google.errorprone:error_prone_core:2.+'
