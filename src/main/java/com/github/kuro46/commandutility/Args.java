@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -25,7 +26,6 @@ public final class Args implements Iterable<Arg> {
 
     public Args(@NonNull final List<Arg> args) {
         Args.validate(args);
-
         this.args = ImmutableList.copyOf(args);
     }
 
@@ -38,23 +38,28 @@ public final class Args implements Iterable<Arg> {
     }
 
     private static void validate(final List<Arg> args) {
-        // Checks duplication
-        final Set<String> names = new HashSet<>();
+        checkDuplication(args);
+        checkOrder(args);
+    }
+
+    private static void checkDuplication(@NonNull final List<Arg> args) {
+        final Set<Arg> set = new HashSet<>();
         for (final Arg arg : args) {
-            final String name = arg.getName();
-            if (!names.add(name)) {
-                final String message = String.format("Duplicated argument: %s", name);
+            if (!set.add(arg)) {
+                final String message = String.format("Duplicated argument: %s", arg.getName());
                 throw new IllegalArgumentException(message);
             }
         }
-        // Validates argument order
+    }
+
+    private static void checkOrder(@NonNull final List<Arg> args) {
         boolean prevIsRequired = true;
         for (final Arg arg : args) {
             final boolean currentIsRequired = arg.isRequired();
             if (currentIsRequired && !prevIsRequired) {
                 throw new IllegalArgumentException("Invalid argument order");
             }
-            prevIsRequired = arg.isRequired();
+            prevIsRequired = currentIsRequired;
         }
     }
 
@@ -81,47 +86,39 @@ public final class Args implements Iterable<Arg> {
     private class Parser {
 
         public Optional<ParsedArgs> parse(final List<String> raw) {
-            if (args.isEmpty()) return Optional.of(new ParsedArgs(Collections.emptyMap()));
+            if (args.isEmpty()) {
+                return Optional.of(new ParsedArgs(Collections.emptyMap()));
+            }
             final List<Pair<String, String>> preparsed = preparse(raw).orElse(null);
             if (preparsed == null) {
                 return Optional.empty();
             }
             final Map<String, String> squashed = squash(preparsed);
-
             return Optional.of(new ParsedArgs(squashed));
         }
 
         private Optional<List<Pair<String, String>>> preparse(final List<String> parts) {
-            final List<Pair<String, String>> preparsed = new ArrayList<>();
-            int index = 0;
-            Arg prevArg = null;
-            while (true) {
-                if (Iterables.get(args, index, null) == null
-                        && Iterables.get(parts, index, null) == null) {
-                    break;
-                }
-                final Arg currentArg = Iterables.get(args, index, prevArg);
-
-                final String value = Iterables.get(parts, index, null);
-                if (value == null && currentArg.isRequired()) {
-                    return Optional.empty();
-                }
-
-                if (value != null) {
-                    preparsed.add(Pair.of(currentArg.getName(), value));
-                }
-
-                // finalize
-                index++;
-                prevArg = currentArg;
+            final long reqArgCount = args.stream()
+                .filter(Arg::isRequired)
+                .count();
+            if (reqArgCount > parts.size()) { // Parts isn't enough
+                return Optional.empty();
             }
-
+            final List<Pair<String, String>> preparsed = new ArrayList<>();
+            for (final ListIterator<String> it = parts.listIterator(); it.hasNext();) {
+                final int valueIndex = it.nextIndex();
+                final String value = it.next();
+                // Find a preferred argument for 'value'.
+                // Fallback to the last argument if not exists.
+                final Arg arg = Iterables.get(args, valueIndex, Iterables.getLast(args));
+                // Add to 'preparsed'.
+                preparsed.add(Pair.of(arg.getName(), value));
+            }
             return Optional.of(preparsed);
         }
 
         private Map<String, String> squash(final List<Pair<String, String>> preparsed) {
             final Map<String, String> squashed = new HashMap<>();
-
             for (final Pair<String, String> pair : preparsed) {
                 final String name = pair.left;
                 final String value = pair.right;
@@ -132,7 +129,6 @@ public final class Args implements Iterable<Arg> {
                     squashed.put(name, appended);
                 }
             }
-
             return squashed;
         }
     }
@@ -141,30 +137,17 @@ public final class Args implements Iterable<Arg> {
 
         private final ImmutableList.Builder<Arg> args = ImmutableList.builder();
 
-        public Builder add(@NonNull final Arg arg) {
-            args.add(arg);
+        public Builder required(@NonNull final String... names) {
+            for (final String name : names) {
+                args.add(new Arg(name, true));
+            }
             return this;
         }
 
-        public Builder add(@NonNull final String name, final boolean required) {
-            return add(new Arg(name, required));
-        }
-
-        public Builder required(@NonNull final String name) {
-            return add(new Arg(name, true));
-        }
-
-        public Builder optional(@NonNull final String name) {
-            return add(new Arg(name, false));
-        }
-
-        public Builder optionalArgs(@NonNull final String... names) {
-            for (String name : names) optional(name);
-            return this;
-        }
-
-        public Builder requiredArgs(@NonNull final String... names) {
-            for (String name : names) required(name);
+        public Builder optional(@NonNull final String... names) {
+            for (final String name : names) {
+                args.add(new Arg(name, false));
+            }
             return this;
         }
 
