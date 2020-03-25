@@ -7,7 +7,7 @@ plugins {
     id 'java-library'
 }
 
-group = 'com.github.kuro46'
+group = 'xyz.shirokuro'
 version = '0.5.0-SNAPSHOT'
 
 repositories {
