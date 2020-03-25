@@ -1,4 +1,4 @@
-package com.github.kuro46.commandutility;
+package xyz.shirokuro.commandutility;
 
 import java.util.List;
 import java.util.stream.Collectors;

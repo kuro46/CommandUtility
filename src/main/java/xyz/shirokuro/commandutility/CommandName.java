@@ -1,4 +1,4 @@
-package com.github.kuro46.commandutility;
+package xyz.shirokuro.commandutility;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
