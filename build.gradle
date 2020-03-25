@@ -44,3 +44,34 @@ tasks.test {
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << '-Xlint:all' << '-Werror' << '-Xlint:-classfile'
 }
+
+// maven
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = rootProject.name
+            from components.java
+            pom {
+                name = 'CommandUtility'
+                url = 'https://github.com/kuro46/CommandUtility'
+            }
+        }
+    }
+    repositories {
+        maven {
+            def publishRootDir = project.hasProperty("commandutility.publish.rootdir")
+                ? project.getProperty("commandutility.publish.rootdir").toString()
+                : buildDir.toString()
+            def releasesRepoUrl = "$publishRootDir/repos/releases"
+            def snapshotsRepoUrl = "$publishRootDir/repos/snapshots"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
