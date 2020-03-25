@@ -45,6 +45,10 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs << '-Xlint:all' << '-Werror' << '-Xlint:-classfile'
 }
 
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 // maven
 
 publishing {
