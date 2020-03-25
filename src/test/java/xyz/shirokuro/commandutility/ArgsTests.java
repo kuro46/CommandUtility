@@ -1,4 +1,4 @@
-package com.github.kuro46.commandutility;
+package xyz.shirokuro.commandutility;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;

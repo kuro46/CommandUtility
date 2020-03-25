@@ -1,4 +1,4 @@
-package com.github.kuro46.commandutility;
+package xyz.shirokuro.commandutility;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
