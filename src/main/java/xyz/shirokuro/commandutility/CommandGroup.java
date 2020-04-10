@@ -5,7 +5,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
+import xyz.shirokuro.commandutility.annotation.Completer;
+import xyz.shirokuro.commandutility.annotation.Executor;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,6 +63,56 @@ public final class CommandGroup implements TabExecutor {
                 current.addChild(new CommandNode(current, section, requiredNames, optionalNames, description, handler));
             }
         }
+        return this;
+    }
+
+    public CommandGroup addAll(final Object o) {
+        final Map<String, Method> executors = new HashMap<>();
+        final Map<String, Method> completers = new HashMap<>();
+        final Map<String, String> descriptions = new HashMap<>();
+        for (Method method : o.getClass().getMethods()) {
+            final Executor executorAnnotation = method.getAnnotation(Executor.class);
+            final Completer completerAnnotation = method.getAnnotation(Completer.class);
+            if (executorAnnotation != null) {
+                executors.put(executorAnnotation.command(), method);
+                descriptions.put(executorAnnotation.command(), executorAnnotation.description());
+            } else if (completerAnnotation != null) {
+                completers.put(completerAnnotation.command(), method);
+            }
+        }
+        executors.forEach((command, method) -> {
+            final Method completer = completers.get(command);
+            if (completer == null) {
+                add((sender, command1, args) -> {
+                    try {
+                        method.invoke(o, sender, command1, args);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new RuntimeException(e);
+                    }
+                }, command, descriptions.get(command));
+            } else {
+                add(new CommandHandler() {
+                    @Override
+                    public void execute(CommandSender sender, CommandNode command, Map<String, String> args) {
+                        try {
+                            method.invoke(o, sender, command, args);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public List<String> complete(CommandSender sender, CommandNode command, String name, String value) {
+                        try {
+                            return (List<String>) completer.invoke(o, sender, command, name, value);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }, command, descriptions.get(command));
+            }
+        });
         return this;
     }
 
