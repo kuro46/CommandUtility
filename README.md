@@ -132,17 +132,5 @@ public class FooPlugin extends JavaPlugin implements CommandHandler {
         }
         return Collections.emptyList();
     }
-
-    @Completer(command = "foo info <player>")
-    public List<String> infoComplete(CommandSender sender, CommandNode command, String name, String value) {
-        if (name.equals("player")) { // 'player' という名前の引数を補完中であれば、プレイヤーリストを表示する
-            return Bukkit.getOnlinePlayers().stream()
-                .map(Player::getName)
-                .filter(s -> s.startsWith(value)) // 現在の値から始まるプレイヤー名に限定する
-                .collect(Collectors.toList());
-        } else { // 今回引数は一つ('player'だけ)のためここに到達することはない
-            throw new RuntimeException("unreachable");
-        }
-    }
 }
 ```
