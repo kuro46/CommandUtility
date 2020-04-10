@@ -1,6 +1,7 @@
 package xyz.shirokuro.commandutility;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
 
@@ -122,7 +123,7 @@ public final class CommandNode implements Node {
                 return joiner.toString();
             });
         }
-        return result;
+        return ImmutableMap.copyOf(result);
     }
 
     public CommandHandler getHandler() {

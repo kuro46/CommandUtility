@@ -45,7 +45,10 @@ public final class CommandGroup implements TabExecutor {
             throw new IllegalArgumentException("No sections exists!");
         }
         if (!root.getChildren().containsKey(sections.get(0))) {
-            Bukkit.getPluginCommand(sections.get(0)).setExecutor(this);
+            // null-check for unit testing
+            if (Bukkit.getServer() != null) {
+                Bukkit.getPluginCommand(sections.get(0)).setExecutor(this);
+            }
         }
         BranchNode current = root;
         for (int i = 0; i < sections.size(); i++) {

@@ -1,6 +1,7 @@
 package xyz.shirokuro.commandutility;
 
 import com.google.common.base.Splitter;
+import org.bukkit.command.CommandSender;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -12,6 +13,10 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CommandNodeTests {
+    private static final CommandHandler NOOP_HANDLER = CommandNodeTests::noopHandler;
+
+    private static void noopHandler(CommandSender sender, CommandNode command, Map<String, String> args) {
+    }
 
     @Test
     public void fromStringTestWithAll() {
@@ -20,7 +25,8 @@ public class CommandNodeTests {
             "buz",
             Collections.singletonList("hoge"),
             Collections.singletonList("piyo"),
-            "");
+            "",
+            NOOP_HANDLER);
         assertEquals(cmd1, cmd2);
     }
 
@@ -31,7 +37,8 @@ public class CommandNodeTests {
             "foo",
             Collections.emptyList(),
             Collections.emptyList(),
-            "");
+            "",
+            NOOP_HANDLER);
         assertEquals(cmd1, cmd2);
     }
 
@@ -56,14 +63,14 @@ public class CommandNodeTests {
     @Test
     public void parseArgsTestWithRequiredOnlyAndSomeNotEnoughInput() {
         final CommandNode cmd = createCommand("foo <foo> <bar>", "");
-        assertThrows(IllegalArgumentException.class, () -> cmd.parseArgs(Collections.singletonList("val1")));
+        assertThrows(CommandNode.ArgumentNotEnoughException.class, () -> cmd.parseArgs(Collections.singletonList("val1"), false));
     }
 
     @Test
     public void parseArgsTestWithOptionalOnlyAndSomeNotEnoughInput() {
         final CommandNode cmd = createCommand("foo [foo] [bar]", "");
         assertDoesNotThrow(() -> {
-            final Map<String, String> result = cmd.parseArgs(Collections.singletonList("val1"));
+            final Map<String, String> result = cmd.parseArgs(Collections.singletonList("val1"), false);
             assertEquals("val1", result.get("foo"));
         });
     }
@@ -71,14 +78,14 @@ public class CommandNodeTests {
     @Test
     public void parseArgsTestWithRequiredOnlyAndNoInput() {
         final CommandNode cmd = createCommand("foo <foo> <bar>", "");
-        assertThrows(IllegalArgumentException.class, () -> cmd.parseArgs(Collections.emptyList()));
+        assertThrows(CommandNode.ArgumentNotEnoughException.class, () -> cmd.parseArgs(Collections.emptyList(), false));
     }
 
     @Test
     public void parseArgsTestWithNoArgsAndSomeInput() {
         final CommandNode cmd = createCommand("foo", "");
         assertDoesNotThrow(() -> {
-            cmd.parseArgs(Arrays.asList("val1", "val2"));
+            cmd.parseArgs(Arrays.asList("val1", "val2"), false);
         });
     }
 
@@ -87,7 +94,7 @@ public class CommandNodeTests {
     public void parseArgsTestWithRequiredOnlyAndCorrect(final String command) {
         final CommandNode cmd = createCommand(command, "");
         assertDoesNotThrow(() -> {
-            final Map<String, String> result = cmd.parseArgs(Arrays.asList("val1", "val2"));
+            final Map<String, String> result = cmd.parseArgs(Arrays.asList("val1", "val2"), false);
             assertEquals("val1", result.get("foo"));
             assertEquals("val2", result.get("bar"));
         });
@@ -98,7 +105,7 @@ public class CommandNodeTests {
     public void parseArgsTestWithRequiredOnlyAndManyArgs(final String command) {
         final CommandNode cmd = createCommand(command, "");
         assertDoesNotThrow(() -> {
-            final Map<String, String> result = cmd.parseArgs(Arrays.asList("val1", "val2", "val3"));
+            final Map<String, String> result = cmd.parseArgs(Arrays.asList("val1", "val2", "val3"), false);
             assertEquals("val1", result.get("foo"));
             assertEquals("val2 val3", result.get("bar"));
         });
@@ -106,7 +113,7 @@ public class CommandNodeTests {
 
     private CommandNode createCommand(final String command, final String description) {
         final CommandGroup group = new CommandGroup()
-            .add(command, description);
+            .add(NOOP_HANDLER, command, description);
         return (CommandNode) group.findCommand(Splitter.on(' ').splitToList(command)).getNode();
     }
 }
