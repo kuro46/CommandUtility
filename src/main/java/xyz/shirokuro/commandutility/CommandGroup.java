@@ -16,6 +16,15 @@ import java.util.stream.Collectors;
 public final class CommandGroup implements TabExecutor {
 
     private final BranchNode root = new BranchNode("root");
+    private final String errorPrefix;
+
+    public CommandGroup(final String errorPrefix) {
+        this.errorPrefix = Objects.requireNonNull(errorPrefix);
+    }
+
+    public CommandGroup() {
+        this("");
+    }
 
     public CommandGroup add(final CommandHandler handler, final String command, final String description) {
         Objects.requireNonNull(command);
@@ -123,7 +132,7 @@ public final class CommandGroup implements TabExecutor {
         normalized.addAll(Arrays.asList(args));
         final FindResult findResult = findCommand(normalized);
         if (findResult.getNode() instanceof BranchNode) {
-            sender.sendMessage("Candidates: " + String.join(", ", ((BranchNode) findResult.getNode()).getChildren().keySet()));
+            sender.sendMessage(errorPrefix + "Candidates: " + String.join(", ", ((BranchNode) findResult.getNode()).getChildren().keySet()));
             return true;
         }
         final CommandNode commandNode = (CommandNode) findResult.getNode();
@@ -141,7 +150,7 @@ public final class CommandGroup implements TabExecutor {
             joiner.add(commandNode.sections());
             joiner.add(requiredStr);
             joiner.add(optionalStr);
-            sender.sendMessage("Usage: /" + joiner.toString());
+            sender.sendMessage(errorPrefix + "Usage: /" + joiner.toString());
             return true;
         }
         commandNode.getHandler().execute(sender, commandNode, parsedArgs);
