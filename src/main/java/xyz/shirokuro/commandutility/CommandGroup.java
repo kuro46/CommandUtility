@@ -8,9 +8,7 @@ import org.bukkit.command.TabExecutor;
 import xyz.shirokuro.commandutility.annotation.Completer;
 import xyz.shirokuro.commandutility.annotation.Executor;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -76,10 +74,14 @@ public final class CommandGroup implements TabExecutor {
         return this;
     }
 
-    private void assertPublic(final Class<?> clazz, final Method method) {
+    private void assertPublic(final Method method) {
         if (!Modifier.isPublic(method.getModifiers())) {
-            throw new IllegalArgumentException("Method: '" + method.getName() + "' in '" + clazz.getName() + "' is not public!");
+            throw new IllegalArgumentException(methodInfo(method) + " is not public!");
         }
+    }
+
+    private String methodInfo(final Method method) {
+        return "Method: '" + method.getName() + "' in '" + method.getDeclaringClass().getName() + "'";
     }
 
     public CommandGroup addAll(final Object o) {
@@ -89,13 +91,19 @@ public final class CommandGroup implements TabExecutor {
             final Executor executorAnnotation = method.getAnnotation(Executor.class);
             final Completer completerAnnotation = method.getAnnotation(Completer.class);
             if (executorAnnotation != null) {
-                assertPublic(o.getClass(), method);
+                assertPublic(method);
+                if (!equalsMethodParams(method, ExecutionData.class)) {
+                    throw new IllegalArgumentException(methodInfo(method) + " is annotated @Executor, but method parameters are incorrect!");
+                }
                 final ReflectedHandlerInfo info =
                     handlerInfoMap.computeIfAbsent(executorAnnotation.command(), s -> new ReflectedHandlerInfo());
                 info.executor = method;
                 info.description = executorAnnotation.description();
             } else if (completerAnnotation != null) {
-                assertPublic(o.getClass(), method);
+                assertPublic(method);
+                if (!equalsMethodParams(method, CompletionData.class)) {
+                    throw new IllegalArgumentException(methodInfo(method) + " is annotated @Completer, but method parameters are incorrect!");
+                }
                 final ReflectedHandlerInfo info =
                     handlerInfoMap.computeIfAbsent(completerAnnotation.command(), s -> new ReflectedHandlerInfo());
                 info.completer = method;
@@ -112,6 +120,10 @@ public final class CommandGroup implements TabExecutor {
             add(handler, command, info.description);
         });
         return this;
+    }
+
+    private boolean equalsMethodParams(Method method, Class<?>... classes) {
+        return Arrays.equals(method.getParameterTypes(), classes);
     }
 
     private static final class ReflectedHandlerInfo {
@@ -142,12 +154,12 @@ public final class CommandGroup implements TabExecutor {
         }
 
         @Override
-        public void execute(ExecutionData data) {
+        public void execute(final ExecutionData data) {
             invokeSilently(caller, executor, data);
         }
 
         @Override
-        public List<String> complete(CompletionData data) {
+        public List<String> complete(final CompletionData data) {
             if (completer != null) {
                 return invokeSilently(caller, completer, data);
             } else {
@@ -157,7 +169,7 @@ public final class CommandGroup implements TabExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         final List<String> normalized = new ArrayList<>();
         normalized.add(command.getName());
         normalized.addAll(Arrays.asList(args));
