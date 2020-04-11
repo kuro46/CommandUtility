@@ -218,8 +218,12 @@ public final class CommandGroup implements TabExecutor {
                 .collect(Collectors.toList());
         } else {
             final CommandNode commandNode = (CommandNode) findResult.getNode();
-            final String argumentName = commandNode.getArgumentAt(completingIndex, true);
-            return commandNode.getHandler().complete(new CompletionData(sender, commandNode, argumentName, completing));
+            try {
+                final String argumentName = commandNode.getArgumentAt(completingIndex, true);
+                return commandNode.getHandler().complete(new CompletionData(sender, commandNode, argumentName, completing));
+            } catch (IndexOutOfBoundsException ignored) {
+                return Collections.emptyList();
+            }
         }
     }
 
