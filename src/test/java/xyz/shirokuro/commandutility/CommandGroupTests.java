@@ -36,6 +36,14 @@ public class CommandGroupTests {
     }
 
     @Test
+    public void findCommandTestFallback() {
+        final CommandGroup.FindResult foundData = new CommandGroup()
+            .add(NOOP_HANDLER, "foo bar", "")
+            .findCommand(Arrays.asList("foo", "ba"));
+        assertEquals("foo", foundData.getNode().getName());
+    }
+
+    @Test
     public void addAllTestExecutorAndCompleter() {
         assertDoesNotThrow(() -> new CommandGroup().addAll(new AnnotationExecutorAndCompleter()));
     }
