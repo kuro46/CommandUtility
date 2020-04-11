@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CommandNodeTests {
     private static final CommandHandler NOOP_HANDLER = CommandNodeTests::noopHandler;
 
-    private static void noopHandler(CommandSender sender, CommandNode command, Map<String, String> args) {
+    private static void noopHandler(ExecutionData data) {
     }
 
     @Test
