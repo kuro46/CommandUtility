@@ -10,6 +10,7 @@ import xyz.shirokuro.commandutility.annotation.Executor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -75,54 +76,80 @@ public final class CommandGroup implements TabExecutor {
         return this;
     }
 
+    private void assertPublic(final Class<?> clazz, final Method method) {
+        if (!Modifier.isPublic(method.getModifiers())) {
+            throw new IllegalArgumentException("Method: '" + method.getName() + "' in '" + clazz.getName() + "' is not public!");
+        }
+    }
+
     public CommandGroup addAll(final Object o) {
-        final Map<String, Method> executors = new HashMap<>();
-        final Map<String, Method> completers = new HashMap<>();
-        final Map<String, String> descriptions = new HashMap<>();
-        for (Method method : o.getClass().getMethods()) {
+        final Map<String, ReflectedHandlerInfo> handlerInfoMap = new HashMap<>();
+        // find all annotated methods
+        for (Method method : o.getClass().getDeclaredMethods()) {
             final Executor executorAnnotation = method.getAnnotation(Executor.class);
             final Completer completerAnnotation = method.getAnnotation(Completer.class);
             if (executorAnnotation != null) {
-                executors.put(executorAnnotation.command(), method);
-                descriptions.put(executorAnnotation.command(), executorAnnotation.description());
+                assertPublic(o.getClass(), method);
+                final ReflectedHandlerInfo info =
+                    handlerInfoMap.computeIfAbsent(executorAnnotation.command(), s -> new ReflectedHandlerInfo());
+                info.executor = method;
+                info.description = executorAnnotation.description();
             } else if (completerAnnotation != null) {
-                completers.put(completerAnnotation.command(), method);
+                assertPublic(o.getClass(), method);
+                final ReflectedHandlerInfo info =
+                    handlerInfoMap.computeIfAbsent(completerAnnotation.command(), s -> new ReflectedHandlerInfo());
+                info.completer = method;
             }
         }
-        executors.forEach((command, method) -> {
-            final Method completer = completers.get(command);
-            if (completer == null) {
-                add((sender, command1, args) -> {
-                    try {
-                        method.invoke(o, sender, command1, args);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeException(e);
-                    }
-                }, command, descriptions.get(command));
-            } else {
-                add(new CommandHandler() {
-                    @Override
-                    public void execute(CommandSender sender, CommandNode command, Map<String, String> args) {
-                        try {
-                            method.invoke(o, sender, command, args);
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-
-                    @Override
-                    @SuppressWarnings("unchecked")
-                    public List<String> complete(CommandSender sender, CommandNode command, String name, String value) {
-                        try {
-                            return (List<String>) completer.invoke(o, sender, command, name, value);
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }, command, descriptions.get(command));
+        // add found executor/completers
+        handlerInfoMap.forEach((command, info) -> {
+            final Method completer = info.completer;
+            final Method executor = info.executor;
+            if (completer != null && executor == null) {
+                throw new IllegalArgumentException("Cannot find executor for '" + command + "'");
             }
+            final ReflectedHandler handler = new ReflectedHandler(o, executor, completer);
+            add(handler, command, info.description);
         });
         return this;
+    }
+
+    private static final class ReflectedHandlerInfo {
+        private Method executor;
+        private Method completer;
+        private String description;
+    }
+
+    private static final class ReflectedHandler implements CommandHandler {
+
+        private final Object caller;
+        private final Method executor;
+        private final Method completer;
+
+        public ReflectedHandler(final Object caller, final Method executor, final Method completer) {
+            this.caller = Objects.requireNonNull(caller);
+            this.executor = Objects.requireNonNull(executor);
+            this.completer = completer;
+        }
+
+        @SuppressWarnings("unchecked")
+        private <T> T invokeSilently(final Object caller, final Method method, final Object... args) {
+            try {
+                return (T) method.invoke(caller, args);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void execute(CommandSender sender, CommandNode command, Map<String, String> args) {
+            invokeSilently(caller, executor, sender, command, args);
+        }
+
+        @Override
+        public List<String> complete(CommandSender sender, CommandNode command, String name, String value) {
+            return invokeSilently(caller, completer, sender, command, name, value);
+        }
     }
 
     @Override
