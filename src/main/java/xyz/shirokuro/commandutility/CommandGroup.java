@@ -231,7 +231,7 @@ public final class CommandGroup implements TabExecutor {
         Node current = root;
         final List<String> unused = new ArrayList<>();
         for (String s : list) {
-            if (current instanceof BranchNode) {
+            if ((current instanceof BranchNode) && ((BranchNode) current).getChildren().containsKey(s)) {
                 current = ((BranchNode) current).getChildren().get(s);
             } else {
                 unused.add(s);
