@@ -168,7 +168,7 @@ public final class CommandGroup implements TabExecutor {
         }
         final int completingIndex = normalized.size() - 1;
         final String completing = normalized.get(completingIndex);
-        final FindResult findResult = findCommand(normalized);
+        final FindResult findResult = findCommand(normalized.subList(0, normalized.size() - 1) /* Remove completing argument*/);
         if (findResult.getNode() instanceof BranchNode) {
             return ((BranchNode) findResult.getNode()).getChildren().keySet().stream()
                 .filter(s -> s.startsWith(completing))
