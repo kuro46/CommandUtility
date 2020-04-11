@@ -142,13 +142,13 @@ public final class CommandGroup implements TabExecutor {
         }
 
         @Override
-        public void execute(CommandSender sender, CommandNode command, Map<String, String> args) {
-            invokeSilently(caller, executor, sender, command, args);
+        public void execute(ExecutionData data) {
+            invokeSilently(caller, executor, data);
         }
 
         @Override
-        public List<String> complete(CommandSender sender, CommandNode command, String name, String value) {
-            return invokeSilently(caller, completer, sender, command, name, value);
+        public List<String> complete(CompletionData data) {
+            return invokeSilently(caller, completer, data);
         }
     }
 
@@ -180,7 +180,7 @@ public final class CommandGroup implements TabExecutor {
             sender.sendMessage(errorPrefix + "Usage: /" + joiner.toString());
             return true;
         }
-        commandNode.getHandler().execute(sender, commandNode, parsedArgs);
+        commandNode.getHandler().execute(new ExecutionData(sender, commandNode, parsedArgs));
         return true;
     }
 
@@ -203,7 +203,7 @@ public final class CommandGroup implements TabExecutor {
         } else {
             final CommandNode commandNode = (CommandNode) findResult.getNode();
             final String argumentName = commandNode.getArgumentAt(completingIndex, true);
-            return commandNode.getHandler().complete(sender, commandNode, argumentName, completing);
+            return commandNode.getHandler().complete(new CompletionData(sender, commandNode, argumentName, completing));
         }
     }
 

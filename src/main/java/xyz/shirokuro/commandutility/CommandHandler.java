@@ -8,9 +8,9 @@ import java.util.Map;
 
 public interface CommandHandler {
 
-    void execute(CommandSender sender, CommandNode command, Map<String, String> args);
+    void execute(ExecutionData data);
 
-    default List<String> complete(CommandSender sender, CommandNode command, String name, String value) {
+    default List<String> complete(CompletionData data) {
         return Collections.emptyList();
     }
 }
