@@ -148,7 +148,11 @@ public final class CommandGroup implements TabExecutor {
 
         @Override
         public List<String> complete(CompletionData data) {
-            return invokeSilently(caller, completer, data);
+            if (completer != null) {
+                return invokeSilently(caller, completer, data);
+            } else {
+                return Collections.emptyList();
+            }
         }
     }
 
