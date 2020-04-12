@@ -34,7 +34,7 @@ maven { url 'https://maven.shirokuro.xyz/repos/releases/' }
 ```
 以下のように依存関係に追加してください。
 ```groovy
-implementation 'xyz.shirokuro:commandutility:0.5.0'
+implementation 'xyz.shirokuro:commandutility:0.6.0'
 ```
 また、必要に応じてshadowプラグインなどを使用してjar内に追加してください。
 
