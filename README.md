@@ -21,7 +21,7 @@ Mavenの場合、まずリポジトリを以下のように追加し、
 <dependency>
     <groupId>xyz.shirokuro</groupId>
     <artifactId>commandutility</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
 </dependency>
 ```
 また、必要に応じてmaven-shade-pluginなどを使用してjar内に追加してください。
