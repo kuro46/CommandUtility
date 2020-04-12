@@ -52,16 +52,18 @@ public class FooPlugin extends JavaPlugin {
     }
 
     @Executor(command = "foo help", description = "Displays help")
-    public void help(CommandSender sender, CommandNode command, Map<String, String> args) {
+    public void help(ExecutionData data) {
+        CommandSender sender = data.getSender();
         sender.sendMessage("/foo help - Show this message");
         sender.sendMessage("/foo info <player> - Displays location of specified player.");
     }
 
     @Executor(command = "foo info <player>", description = "Displays location of specified player.")
-    public void info(CommandSender sender, CommandNode command, Map<String, String> args) {
-        Player target = Bukkit.getPlayer(args.get("player"));
+    public void info(ExecutionData data) {
+        CommandSender sender = data.getSender();
+        Player target = Bukkit.getPlayer(data.get("player"));
         if (target == null) {
-            sender.sendMessage("Cannot find player named " + args.get("player"));
+            sender.sendMessage("Cannot find player named " + data.get("player"));
             return;
         }
         sender.sendMessage(String.format("World: %s X: %s Y: %s Z: %s",
@@ -72,11 +74,11 @@ public class FooPlugin extends JavaPlugin {
     }
 
     @Completer(command = "foo info <player>")
-    public List<String> infoComplete(CommandSender sender, CommandNode command, String name, String value) {
-        if (name.equals("player")) { // 'player' という名前の引数を補完中であれば、プレイヤーリストを表示する
+    public List<String> infoComplete(CompletionData data) {
+        if (data.getName().equals("player")) { // 'player' という名前の引数を補完中であれば、プレイヤーリストを表示する
             return Bukkit.getOnlinePlayers().stream()
                 .map(Player::getName)
-                .filter(s -> s.startsWith(value)) // 現在の値から始まるプレイヤー名に限定する
+                .filter(s -> s.startsWith(data.getCurrentValue())) // 現在の値から始まるプレイヤー名に限定する
                 .collect(Collectors.toList());
         } else { // 今回引数は一つ('player'だけ)のためここに到達することはない
             throw new RuntimeException("unreachable");
@@ -97,16 +99,17 @@ public class FooPlugin extends JavaPlugin implements CommandHandler {
     }
 
     @Override
-    public void execute(CommandSender sender, CommandNode command, Map<String, String> args) {
-        switch (command.sections()) {
+    public void execute(ExecutionData data) {
+        CommandSender sender = data.getSender();
+        switch (data.getCommand().sections()) {
             case "foo help":
                 sender.sendMessage("/foo help - Show this message");
                 sender.sendMessage("/foo info <player> - Displays location of specified player.");
                 break;
             case "foo info":
-                Player target = Bukkit.getPlayer(args.get("player"));
+                Player target = Bukkit.getPlayer(data.get("player"));
                 if (target == null) {
-                    sender.sendMessage("Cannot find player named " + args.get("player"));
+                    sender.sendMessage("Cannot find player named " + data.get("player"));
                     return;
                 }
                 sender.sendMessage(String.format("World: %s X: %s Y: %s Z: %s",
@@ -119,12 +122,12 @@ public class FooPlugin extends JavaPlugin implements CommandHandler {
     }
 
     @Override
-    public List<String> complete(CommandSender sender, CommandNode command, String name, String value) {
-        if (command.sections().equals("foo info")) {
-            if (name.equals("player")) { // 'player' という名前の引数を補完中であれば、プレイヤーリストを表示する
+    public List<String> complete(CompletionData data) {
+        if (data.getCommand().sections().equals("foo info")) {
+            if (data.getName().equals("player")) { // 'player' という名前の引数を補完中であれば、プレイヤーリストを表示する
                 return Bukkit.getOnlinePlayers().stream()
                     .map(Player::getName)
-                    .filter(s -> s.startsWith(value)) // 現在の値から始まるプレイヤー名に限定する
+                    .filter(s -> s.startsWith(data.getCurrentValue())) // 現在の値から始まるプレイヤー名に限定する
                     .collect(Collectors.toList());
             } else { // 今回引数は一つ('player'だけ)のためここに到達することはない
                 throw new RuntimeException("unreachable");
