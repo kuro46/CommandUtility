@@ -205,12 +205,14 @@ public final class CommandGroup implements TabExecutor {
         final List<String> normalized = new ArrayList<>();
         normalized.add(command.getName());
         for (String arg : args) {
-            if (!arg.equals(" ")) {
+            if (!arg.isEmpty()) {
                 normalized.add(arg);
             }
         }
-        final int completingIndex = normalized.size() - 1;
-        final String completing = normalized.get(completingIndex);
+        if (args.length >= 1 && args[args.length - 1].isEmpty()) {
+            normalized.add("");
+        }
+        final String completing = normalized.get(normalized.size() - 1);
         final FindResult findResult = findCommand(normalized.subList(0, normalized.size() - 1) /* Remove completing argument*/);
         if (findResult.getNode() instanceof BranchNode) {
             return ((BranchNode) findResult.getNode()).getChildren().keySet().stream()
@@ -218,26 +220,41 @@ public final class CommandGroup implements TabExecutor {
                 .collect(Collectors.toList());
         } else {
             final CommandNode commandNode = (CommandNode) findResult.getNode();
+            final List<String> argumentNames = new ArrayList<>();
+            argumentNames.addAll(commandNode.getRequiredNames());
+            argumentNames.addAll(commandNode.getOptionalNames());
+            final String argumentName = argumentNames.get(Math.min(argumentNames.size() - 1, findResult.getUnused().size()));
             try {
-                final String argumentName = commandNode.getArgumentAt(completingIndex, true);
-                return commandNode.getHandler().complete(new CompletionData(sender, commandNode, argumentName, completing));
-            } catch (IndexOutOfBoundsException ignored) {
-                return Collections.emptyList();
+                final List<String> argsForParse = new ArrayList<>(findResult.getUnused());
+                argsForParse.add(completing);
+                final String argumentValue = commandNode.parseArgs(argsForParse, true).get(argumentName);
+                return commandNode.getHandler().complete(new CompletionData(sender, commandNode, argumentName, argumentValue));
+            } catch (CommandNode.ArgumentNotEnoughException e) {
+                throw new RuntimeException("unreachable", e);
             }
         }
     }
 
     public FindResult findCommand(final List<String> list) {
-        Node current = root;
+        Node currentNode = root;
+        boolean decided = false;
         final List<String> unused = new ArrayList<>();
         for (String s : list) {
-            if ((current instanceof BranchNode) && ((BranchNode) current).getChildren().containsKey(s)) {
-                current = ((BranchNode) current).getChildren().get(s);
-            } else {
+            if (decided) {
                 unused.add(s);
+            } else {
+                Node temp = ((BranchNode) currentNode).getChildren().get(s);
+                if (temp == null) {
+                    decided = true;
+                } else {
+                    if (temp instanceof CommandNode) {
+                        decided = true;
+                    }
+                    currentNode = temp;
+                }
             }
         }
-        return new FindResult(current, unused);
+        return new FindResult(currentNode, unused);
     }
 
     public static final class FindResult {
