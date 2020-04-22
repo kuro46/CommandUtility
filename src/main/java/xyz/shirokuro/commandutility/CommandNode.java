@@ -18,23 +18,23 @@ public final class CommandNode implements Node {
 
     private final BranchNode parent;
     private final String name;
-    private final List<String> requiredNames;
-    private final List<String> optionalNames;
+    private final List<ArgumentInfo> requiredArgs;
+    private final List<ArgumentInfo> optionalArgs;
     private final String description;
     private final CommandHandler handler;
 
     public CommandNode(
         final BranchNode parent,
         final String name,
-        final List<String> requiredNames,
-        final List<String> optionalNames,
+        final List<ArgumentInfo> requiredArgs,
+        final List<ArgumentInfo> optionalArgs,
         final String description,
         final CommandHandler handler) {
 
         this.parent = parent;
         this.name = Objects.requireNonNull(name);
-        this.requiredNames = ImmutableList.copyOf(Objects.requireNonNull(requiredNames));
-        this.optionalNames = ImmutableList.copyOf(Objects.requireNonNull(optionalNames));
+        this.requiredArgs = ImmutableList.copyOf(Objects.requireNonNull(requiredArgs));
+        this.optionalArgs = ImmutableList.copyOf(Objects.requireNonNull(optionalArgs));
         this.description = Objects.requireNonNull(description);
         this.handler = Objects.requireNonNull(handler);
     }
@@ -49,12 +49,12 @@ public final class CommandNode implements Node {
         return Optional.ofNullable(parent);
     }
 
-    public List<String> getRequiredNames() {
-        return requiredNames;
+    public List<ArgumentInfo> getRequiredArgs() {
+        return requiredArgs;
     }
 
-    public List<String> getOptionalNames() {
-        return optionalNames;
+    public List<ArgumentInfo> getOptionalArgs() {
+        return optionalArgs;
     }
 
     public String getDescription() {
@@ -71,7 +71,7 @@ public final class CommandNode implements Node {
         return String.join(" ", deque);
     }
 
-    public String getArgumentAt(int index, final boolean includeSection) {
+    public ArgumentInfo getArgumentAt(int index, final boolean includeSection) {
         if (includeSection) {
             Node current = this;
             while (current.getParent().isPresent()) {
@@ -79,25 +79,25 @@ public final class CommandNode implements Node {
                 index--;
             }
         }
-        if (index < requiredNames.size()) {
-            return requiredNames.get(index);
+        if (index < requiredArgs.size()) {
+            return requiredArgs.get(index);
         } else {
-            return optionalNames.get(index - requiredNames.size());
+            return optionalArgs.get(index - requiredArgs.size());
         }
     }
 
-    public String getArgumentAt(final int index) {
+    public ArgumentInfo getArgumentAt(final int index) {
         return getArgumentAt(index, false);
     }
 
     public Map<String, String> parseArgs(final List<String> argumentsList, final boolean ignoreNotEnough) throws ArgumentNotEnoughException {
         Objects.requireNonNull(argumentsList);
-        if (requiredNames.isEmpty() && optionalNames.isEmpty()) {
+        if (requiredArgs.isEmpty() && optionalArgs.isEmpty()) {
             return Collections.emptyMap();
         }
         final Map<String, String> result = new HashMap<>();
         final Iterator<String> iterator = argumentsList.iterator();
-        for (String requiredName : requiredNames) {
+        for (ArgumentInfo requiredName : requiredArgs) {
             if (!iterator.hasNext()) {
                 if (ignoreNotEnough) {
                     break;
@@ -105,13 +105,13 @@ public final class CommandNode implements Node {
                     throw new ArgumentNotEnoughException();
                 }
             }
-            result.put(requiredName, iterator.next());
+            result.put(requiredName.getName(), iterator.next());
         }
-        for (String optionalName : optionalNames) {
+        for (ArgumentInfo optionalName : optionalArgs) {
             if (!iterator.hasNext()) {
                 break;
             }
-            result.put(optionalName, iterator.next());
+            result.put(optionalName.getName(), iterator.next());
         }
         if (iterator.hasNext()) {
             result.compute(getArgumentAt(result.size() - 1), (key, value) -> {
@@ -137,14 +137,14 @@ public final class CommandNode implements Node {
         CommandNode command = (CommandNode) o;
         return Objects.equals(parent, command.parent) &&
             Objects.equals(name, command.name) &&
-            Objects.equals(requiredNames, command.requiredNames) &&
-            Objects.equals(optionalNames, command.optionalNames) &&
+            Objects.equals(requiredArgs, command.requiredArgs) &&
+            Objects.equals(optionalArgs, command.optionalArgs) &&
             Objects.equals(description, command.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parent, name, requiredNames, optionalNames, description);
+        return Objects.hash(parent, name, requiredArgs, optionalArgs, description);
     }
 
     @Override
@@ -152,8 +152,8 @@ public final class CommandNode implements Node {
         return "Command{" +
             "parent=" + parent +
             ", name='" + name + '\'' +
-            ", requiredNames=" + requiredNames +
-            ", optionalNames=" + optionalNames +
+            ", requiredArgs=" + requiredArgs +
+            ", optionalArgs=" + optionalArgs +
             ", description='" + description + '\'' +
             '}';
     }

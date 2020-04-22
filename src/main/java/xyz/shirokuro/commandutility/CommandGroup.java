@@ -2,6 +2,8 @@ package xyz.shirokuro.commandutility;
 
 import com.google.common.base.Splitter;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -15,15 +17,38 @@ import java.util.stream.Collectors;
 
 public final class CommandGroup implements TabExecutor {
 
+    private final Map<String, CommandCompleter> completerMap = new HashMap<>();
     private final BranchNode root = new BranchNode("root");
     private final String errorPrefix;
 
     public CommandGroup(final String errorPrefix) {
         this.errorPrefix = Objects.requireNonNull(errorPrefix);
+        addDefaultCompleters();
     }
 
     public CommandGroup() {
         this("");
+    }
+
+    private void addDefaultCompleters() {
+        addCompleter("worlds", data -> {
+            return Bukkit.getWorlds().stream()
+                .map(World::getName)
+                .filter(s -> s.startsWith(data.getCurrentValue()))
+                .collect(Collectors.toList());
+        });
+        addCompleter("players", data -> {
+            return Bukkit.getOnlinePlayers().stream()
+                .map(Player::getName)
+                .filter(s -> s.startsWith(data.getCurrentValue()))
+                .collect(Collectors.toList());
+        });
+    }
+
+    public void addCompleter(final String argumentName, final CommandCompleter completer) {
+        Objects.requireNonNull(argumentName);
+        Objects.requireNonNull(completer);
+        completerMap.put(argumentName, completer);
     }
 
     public CommandGroup add(final CommandHandler handler, final String command, final String description) {
@@ -33,22 +58,22 @@ public final class CommandGroup implements TabExecutor {
         if (command.trim().isEmpty()) {
             throw new IllegalArgumentException("command is empty!");
         }
-        final List<String> requiredNames = new ArrayList<>();
-        final List<String> optionalNames = new ArrayList<>();
+        final List<ArgumentInfo> requiredArgs = new ArrayList<>();
+        final List<ArgumentInfo> optionalArgs = new ArrayList<>();
         final List<String> sections = new ArrayList<>();
         for (final String part : Splitter.on(' ').split(command)) {
             final char start = part.charAt(0);
             final char end = part.charAt(part.length() - 1);
             if (start == '<' && end == '>') {
-                if (!optionalNames.isEmpty()) {
+                if (!optionalArgs.isEmpty()) {
                     throw new RuntimeException("Found required argument after optional argument part");
                 }
-                final String name = part.substring(1, part.length() - 1);
-                requiredNames.add(name);
+                final String info = part.substring(1, part.length() - 1);
+                requiredArgs.add(ArgumentInfo.fromString(info));
             } else if (start == '[' && end == ']') {
-                final String name = part.substring(1, part.length() - 1);
-                optionalNames.add(name);
-            } else if (!requiredNames.isEmpty() || !optionalNames.isEmpty()) {
+                final String info = part.substring(1, part.length() - 1);
+                optionalArgs.add(ArgumentInfo.fromString(info));
+            } else if (!requiredArgs.isEmpty() || !optionalArgs.isEmpty()) {
                 throw new RuntimeException("Found command part after argument part");
             } else {
                 sections.add(part);
@@ -75,7 +100,7 @@ public final class CommandGroup implements TabExecutor {
             if (i < sections.size() - 1) {
                 current = current.branch(section);
             } else {
-                current.addChild(new CommandNode(current, section, requiredNames, optionalNames, description, handler));
+                current.addChild(new CommandNode(current, section, requiredArgs, optionalArgs, description, handler));
             }
         }
         return this;
@@ -227,15 +252,19 @@ public final class CommandGroup implements TabExecutor {
                 .collect(Collectors.toList());
         } else {
             final CommandNode commandNode = (CommandNode) findResult.getNode();
-            final List<String> argumentNames = new ArrayList<>();
-            argumentNames.addAll(commandNode.getRequiredNames());
-            argumentNames.addAll(commandNode.getOptionalNames());
-            final String argumentName = argumentNames.get(Math.min(argumentNames.size() - 1, findResult.getUnused().size()));
+            final List<ArgumentInfo> argumentInfos = new ArrayList<>();
+            argumentInfos.addAll(commandNode.getRequiredArgs());
+            argumentInfos.addAll(commandNode.getOptionalArgs());
+            final ArgumentInfo argumentInfo = argumentInfos.get(Math.min(argumentInfos.size() - 1, findResult.getUnused().size()));
+            final String argumentName = argumentInfo.getName();
             try {
                 final List<String> argsForParse = new ArrayList<>(findResult.getUnused());
                 argsForParse.add(completing);
                 final String argumentValue = commandNode.parseArgs(argsForParse, true).get(argumentName);
-                return commandNode.getHandler().complete(new CompletionData(sender, commandNode, argumentName, argumentValue));
+                final CommandCompleter completer = argumentInfo.getCompleterName()
+                    .map(completerMap::get)
+                    .orElse(commandNode::getHandler);
+                return completer.complete(new CompletionData(sender, commandNode, argumentName, argumentValue));
             } catch (CommandNode.ArgumentNotEnoughException e) {
                 throw new RuntimeException("unreachable", e);
             }
