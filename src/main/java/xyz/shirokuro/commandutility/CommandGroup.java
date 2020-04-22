@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
+import org.bukkit.command.PluginCommand;
 import xyz.shirokuro.commandutility.annotation.Completer;
 import xyz.shirokuro.commandutility.annotation.Executor;
 
@@ -56,10 +57,16 @@ public final class CommandGroup implements TabExecutor {
         if (sections.isEmpty()) {
             throw new IllegalArgumentException("No sections exists!");
         }
+        // Register to Bukkit API
         if (!root.getChildren().containsKey(sections.get(0))) {
             // null-check for unit testing
             if (Bukkit.getServer() != null) {
-                Bukkit.getPluginCommand(sections.get(0)).setExecutor(this);
+                final PluginCommand pluginCommand = Bukkit.getPluginCommand(sections.get(0));
+                if (pluginCommand == null) {
+                    throw new IllegalArgumentException("Command: " + sections.get(0) +
+                            " is not registered by any plugins");
+                }
+                pluginCommand.setExecutor(this);
             }
         }
         BranchNode current = root;
