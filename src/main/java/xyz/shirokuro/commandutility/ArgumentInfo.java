@@ -39,6 +39,27 @@ public final class ArgumentInfo {
     public String toString() {
         return name + ":" + completerName;
     }
+
+    @Override
+    public boolean equals(final Object other) {
+        if (other == null) {
+            return false;
+        }
+        if (!(other instanceof ArgumentInfo)) {
+            return false;
+        }
+        final ArgumentInfo casted = (ArgumentInfo) other;
+        if (completerName == null) {
+            return name.equals(casted.name) && casted.completerName == null;
+        } else {
+            return name.equals(casted.name) && completerName.equals(casted.completerName);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, completerName);
+    }
 }
 
 

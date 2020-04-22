@@ -215,10 +215,12 @@ public final class CommandGroup implements TabExecutor {
         try {
             parsedArgs = commandNode.parseArgs(findResult.getUnused(), false);
         } catch (CommandNode.ArgumentNotEnoughException e) {
-            final String requiredStr = commandNode.getRequiredNames().stream()
+            final String requiredStr = commandNode.getRequiredArgs().stream()
+                .map(ArgumentInfo::getName)
                 .map(s -> "<" + s + ">")
                 .collect(Collectors.joining(" "));
-            final String optionalStr = commandNode.getOptionalNames().stream()
+            final String optionalStr = commandNode.getOptionalArgs().stream()
+                .map(ArgumentInfo::getName)
                 .map(s -> "[" + s + "]")
                 .collect(Collectors.joining(" "));
             final StringJoiner joiner = new StringJoiner(" ");
@@ -263,7 +265,7 @@ public final class CommandGroup implements TabExecutor {
                 final String argumentValue = commandNode.parseArgs(argsForParse, true).get(argumentName);
                 final CommandCompleter completer = argumentInfo.getCompleterName()
                     .map(completerMap::get)
-                    .orElse(commandNode::getHandler);
+                    .orElse(commandNode.getHandler());
                 return completer.complete(new CompletionData(sender, commandNode, argumentName, argumentValue));
             } catch (CommandNode.ArgumentNotEnoughException e) {
                 throw new RuntimeException("unreachable", e);

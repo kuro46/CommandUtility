@@ -23,8 +23,8 @@ public class CommandNodeTests {
         final CommandNode cmd1 = createCommand("foo bar buz <hoge> [piyo]", "");
         final CommandNode cmd2 = new CommandNode(new BranchNode("root").branch("foo").branch("bar"),
             "buz",
-            Collections.singletonList("hoge"),
-            Collections.singletonList("piyo"),
+            Collections.singletonList(new ArgumentInfo("hoge", null)),
+            Collections.singletonList(new ArgumentInfo("piyo", null)),
             "",
             NOOP_HANDLER);
         assertEquals(cmd1, cmd2);
@@ -51,13 +51,13 @@ public class CommandNodeTests {
     @Test
     public void getArgumentAtTestWithRequiredRange() {
         final CommandNode cmd = createCommand("foo <bar> [buz]", "");
-        assertEquals("bar", cmd.getArgumentAt(0));
+        assertEquals(new ArgumentInfo("bar", null), cmd.getArgumentAt(0));
     }
 
     @Test
     public void getArgumentAtTestWithOptionalRange() {
         final CommandNode cmd = createCommand("foo <bar> [buz]", "");
-        assertEquals("buz", cmd.getArgumentAt(1));
+        assertEquals(new ArgumentInfo("buz", null), cmd.getArgumentAt(1));
     }
 
     @Test

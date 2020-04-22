@@ -114,7 +114,7 @@ public final class CommandNode implements Node {
             result.put(optionalName.getName(), iterator.next());
         }
         if (iterator.hasNext()) {
-            result.compute(getArgumentAt(result.size() - 1), (key, value) -> {
+            result.compute(getArgumentAt(result.size() - 1).getName(), (key, value) -> {
                 final StringJoiner joiner = new StringJoiner(" ");
                 joiner.add(value);
                 while (iterator.hasNext()) {
