@@ -2,10 +2,16 @@ package xyz.shirokuro.commandutility;
 
 import com.google.common.collect.ImmutableMap;
 
+import java.util.Deque;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.Comparator;
 
 public final class BranchNode implements Node {
 
@@ -41,6 +47,34 @@ public final class BranchNode implements Node {
     }
 
     /**
+     * Walk the tree.
+     *
+     * @return List of CommandNode. Sorted.
+     */
+    public List<CommandNode> walkNodeTree() {
+        final List<CommandNode> commands = new ArrayList<>();
+        final Deque<BranchNode> branches = new ArrayDeque<>();
+        branches.addFirst(this);
+        while (true) {
+            final BranchNode branch = branches.pollFirst();
+            System.err.println(branch);
+            if (branch == null) {
+                break;
+            }
+            branch.children.values().stream()
+                .sorted(Comparator.comparing(Node::getName))
+                .forEach(node -> {
+                    if (node instanceof BranchNode) {
+                        branches.addLast((BranchNode) node);
+                    } else {
+                        commands.add((CommandNode) node);
+                    }
+                });
+        }
+        return commands;
+    }
+
+    /**
      * Find branch by specified name. If not exists, it creates new branch.
      *
      * @param name Name of branch
@@ -72,7 +106,7 @@ public final class BranchNode implements Node {
     @Override
     public String toString() {
         return "Branch{" +
-            ", name='" + name + '\'' +
+            "name='" + name + '\'' +
             ", parent=" + parent +
             '}';
     }

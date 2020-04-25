@@ -30,6 +30,10 @@ public final class CommandGroup implements TabExecutor {
         this("");
     }
 
+    public BranchNode getRoot() {
+        return root;
+    }
+
     private void addDefaultCompleters() {
         addCompleter("worlds", data -> {
             return Bukkit.getWorlds().stream()
