@@ -8,6 +8,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.ChatColor;
 import xyz.shirokuro.commandutility.annotation.Completer;
 import xyz.shirokuro.commandutility.annotation.Executor;
 
@@ -20,6 +21,8 @@ public final class CommandGroup implements TabExecutor {
     private final Map<String, CommandCompleter> completerMap = new HashMap<>();
     private final BranchNode root = new BranchNode("root");
     private final String errorPrefix;
+    private boolean generateHelp = false;
+    private String helpHeader = null;
 
     public CommandGroup(final String errorPrefix) {
         this.errorPrefix = Objects.requireNonNull(errorPrefix);
@@ -47,6 +50,12 @@ public final class CommandGroup implements TabExecutor {
                 .filter(s -> s.startsWith(data.getCurrentValue()))
                 .collect(Collectors.toList());
         });
+    }
+
+    public CommandGroup generateHelp(final String header) {
+        generateHelp = true;
+        helpHeader = Objects.requireNonNull(header);
+        return this;
     }
 
     public CommandGroup addCompleter(final String argumentName, final CommandCompleter completer) {
@@ -79,18 +88,7 @@ public final class CommandGroup implements TabExecutor {
         if (sections.isEmpty()) {
             throw new IllegalArgumentException("No sections exists!");
         }
-        // Register to Bukkit API
-        if (!root.getChildren().containsKey(sections.get(0))) {
-            // null-check for unit testing
-            if (Bukkit.getServer() != null) {
-                final PluginCommand pluginCommand = Bukkit.getPluginCommand(sections.get(0));
-                if (pluginCommand == null) {
-                    throw new IllegalArgumentException("Command: " + sections.get(0) +
-                            " is not registered by any plugins");
-                }
-                pluginCommand.setExecutor(this);
-            }
-        }
+        final boolean firstTime = !root.getChildren().containsKey(sections.get(0));
         BranchNode current = root;
         for (int i = 0; i < sections.size(); i++) {
             final String section = sections.get(i);
@@ -100,7 +98,46 @@ public final class CommandGroup implements TabExecutor {
                 current.addChild(new CommandNode(current, section, args, description, handler));
             }
         }
+        if (firstTime) {
+            // null-check for unit testing
+            // Register to Bukkit API
+            if (Bukkit.getServer() != null) {
+                final PluginCommand pluginCommand = Bukkit.getPluginCommand(sections.get(0));
+                if (pluginCommand == null) {
+                    throw new IllegalArgumentException("Command: " + sections.get(0) +
+                            " is not registered by any plugins");
+                }
+                pluginCommand.setExecutor(this);
+            }
+            if (generateHelp) {
+                registerHelp(sections.get(0));
+            }
+        }
         return this;
+    }
+
+    private void registerHelp(final String root) {
+        add(data -> {
+            final BranchNode rootBranch = getRoot();
+            final CommandSender sender = data.getSender();
+            sender.sendMessage(helpHeader);
+            for (final CommandNode commandNode : rootBranch.walkNodeTree()) {
+                final StringJoiner sj = new StringJoiner(" ");
+                sj.add(ChatColor.GRAY + commandNode.sections() + ChatColor.RESET);
+                commandNode.getArgs().stream()
+                    .map(info -> {
+                        if (info.isRequired()) {
+                            return ChatColor.GOLD + "<" + info.getName() + ">" + ChatColor.RESET;
+                        } else {
+                            return ChatColor.YELLOW + "[" + info.getName() + "]" + ChatColor.RESET;
+                        }
+                    })
+                .forEach(sj::add);
+                sj.add("-");
+                sj.add(commandNode.getDescription());
+                sender.sendMessage(sj.toString());
+            }
+        }, root + " help", "Show this message");
     }
 
     private void assertPublic(final Method method) {
