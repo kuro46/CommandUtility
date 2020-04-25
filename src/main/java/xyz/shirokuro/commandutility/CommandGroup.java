@@ -59,24 +59,16 @@ public final class CommandGroup implements TabExecutor {
         if (command.trim().isEmpty()) {
             throw new IllegalArgumentException("command is empty!");
         }
-        final List<ArgumentInfo> requiredArgs = new ArrayList<>();
-        final List<ArgumentInfo> optionalArgs = new ArrayList<>();
+        final List<ArgumentInfo> args = new ArrayList<>();
         final List<String> sections = new ArrayList<>();
         for (final String part : Splitter.on(' ').split(command)) {
-            final char start = part.charAt(0);
-            final char end = part.charAt(part.length() - 1);
-            if (start == '<' && end == '>') {
-                if (!optionalArgs.isEmpty()) {
-                    throw new RuntimeException("Found required argument after optional argument part");
-                }
-                final String info = part.substring(1, part.length() - 1);
-                requiredArgs.add(ArgumentInfo.fromString(info));
-            } else if (start == '[' && end == ']') {
-                final String info = part.substring(1, part.length() - 1);
-                optionalArgs.add(ArgumentInfo.fromString(info));
-            } else if (!requiredArgs.isEmpty() || !optionalArgs.isEmpty()) {
-                throw new RuntimeException("Found command part after argument part");
+            final Optional<ArgumentInfo> optionalInfo = ArgumentInfo.fromString(part);
+            if (optionalInfo.isPresent()) {
+                args.add(optionalInfo.get());
             } else {
+                if (!args.isEmpty()) {
+                    throw new RuntimeException("Found command part after argument part");
+                }
                 sections.add(part);
             }
         }
@@ -101,7 +93,7 @@ public final class CommandGroup implements TabExecutor {
             if (i < sections.size() - 1) {
                 current = current.branch(section);
             } else {
-                current.addChild(new CommandNode(current, section, requiredArgs, optionalArgs, description, handler));
+                current.addChild(new CommandNode(current, section, args, description, handler));
             }
         }
         return this;
@@ -216,18 +208,18 @@ public final class CommandGroup implements TabExecutor {
         try {
             parsedArgs = commandNode.parseArgs(findResult.getUnused(), false);
         } catch (CommandNode.ArgumentNotEnoughException e) {
-            final String requiredStr = commandNode.getRequiredArgs().stream()
-                .map(ArgumentInfo::getName)
-                .map(s -> "<" + s + ">")
-                .collect(Collectors.joining(" "));
-            final String optionalStr = commandNode.getOptionalArgs().stream()
-                .map(ArgumentInfo::getName)
-                .map(s -> "[" + s + "]")
+            final String requiredStr = commandNode.getArgs().stream()
+                .map(info -> {
+                    if (info.isRequired()) {
+                        return "<" + info.getName() + ">";
+                    } else {
+                        return "[" + info.getName() + "]";
+                    }
+                })
                 .collect(Collectors.joining(" "));
             final StringJoiner joiner = new StringJoiner(" ");
             joiner.add(commandNode.sections());
             joiner.add(requiredStr);
-            joiner.add(optionalStr);
             sender.sendMessage(errorPrefix + "Usage: /" + joiner.toString());
             return true;
         }
@@ -255,10 +247,7 @@ public final class CommandGroup implements TabExecutor {
                 .collect(Collectors.toList());
         } else {
             final CommandNode commandNode = (CommandNode) findResult.getNode();
-            final List<ArgumentInfo> argumentInfos = new ArrayList<>();
-            argumentInfos.addAll(commandNode.getRequiredArgs());
-            argumentInfos.addAll(commandNode.getOptionalArgs());
-            final ArgumentInfo argumentInfo = argumentInfos.get(Math.min(argumentInfos.size() - 1, findResult.getUnused().size()));
+            final ArgumentInfo argumentInfo = commandNode.getArgs().get(Math.min(commandNode.getArgs().size() - 1, findResult.getUnused().size()));
             final String argumentName = argumentInfo.getName();
             try {
                 final List<String> argsForParse = new ArrayList<>(findResult.getUnused());

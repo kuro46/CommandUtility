@@ -1,30 +1,44 @@
 package xyz.shirokuro.commandutility;
 
+import com.google.common.base.Splitter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 public final class ArgumentInfo {
+    private static final Pattern ARGUMENT_STR_VALIDATOR =
+        Pattern.compile("^[<\\[](.*?)(?::(.*))?[>\\]]$");
+
     private final String name;
     private final String completerName;
+    private final boolean required;
 
-    public ArgumentInfo(final String name, final String completerName) {
+    public ArgumentInfo(final String name, final String completerName, final boolean required) {
         this.name = Objects.requireNonNull(name);
         this.completerName = completerName;
+        this.required = required;
     }
 
-    public static ArgumentInfo fromString(final String str) {
-        final int index = str.indexOf(':');
-        if (index == -1) {
-            return new ArgumentInfo(str, null);
+    /**
+     * Create ArgumentInfo from string.
+     *
+     * If {@code str} is a invalid format, It will returns empty optional.
+     *
+     * @return ArgumentInfo. If {@code str} is a invalid format, It will returns empty optional.
+     */
+    public static Optional<ArgumentInfo> fromString(final String str) {
+        final Matcher m = ARGUMENT_STR_VALIDATOR.matcher(str);
+        if (!m.find()) {
+            return Optional.empty();
         }
-        final String name = str.substring(0, index);
-        final String completerName;
-        if (index == str.length() - 1) {
-            completerName = "";
-        } else {
-            completerName = str.substring(index + 1, str.length());
-        }
-        return new ArgumentInfo(name, completerName);
+        final String name = m.group(1);
+        final String completerName = m.group(2);
+        final boolean required = str.charAt(0) == '<';
+        return Optional.of(new ArgumentInfo(name, completerName, required));
     }
 
     public String getName() {
@@ -35,30 +49,38 @@ public final class ArgumentInfo {
         return Optional.ofNullable(completerName);
     }
 
+    public boolean isRequired() {
+        return required;
+    }
+
+    public boolean isOptional() {
+        return !required;
+    }
+
     @Override
     public String toString() {
-        return name + ":" + completerName;
+        final String inner = name + ":" + completerName;
+        if (required) {
+            return "<" + inner + ">";
+        } else {
+            return "[" + inner + "]";
+        }
     }
 
     @Override
     public boolean equals(final Object other) {
-        if (other == null) {
-            return false;
-        }
-        if (!(other instanceof ArgumentInfo)) {
+        if (other == null || !(other instanceof ArgumentInfo)) {
             return false;
         }
         final ArgumentInfo casted = (ArgumentInfo) other;
-        if (completerName == null) {
-            return name.equals(casted.name) && casted.completerName == null;
-        } else {
-            return name.equals(casted.name) && completerName.equals(casted.completerName);
-        }
+        return required == casted.required
+            && Objects.equals(name, casted.name)
+            && Objects.equals(completerName, casted.completerName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, completerName);
+        return Objects.hash(name, completerName, required);
     }
 }
 

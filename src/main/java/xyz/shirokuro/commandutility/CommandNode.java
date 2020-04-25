@@ -18,25 +18,34 @@ public final class CommandNode implements Node {
 
     private final BranchNode parent;
     private final String name;
-    private final List<ArgumentInfo> requiredArgs;
-    private final List<ArgumentInfo> optionalArgs;
+    private final List<ArgumentInfo> args;
     private final String description;
     private final CommandHandler handler;
 
     public CommandNode(
         final BranchNode parent,
         final String name,
-        final List<ArgumentInfo> requiredArgs,
-        final List<ArgumentInfo> optionalArgs,
+        final List<ArgumentInfo> args,
         final String description,
         final CommandHandler handler) {
 
         this.parent = parent;
         this.name = Objects.requireNonNull(name);
-        this.requiredArgs = ImmutableList.copyOf(Objects.requireNonNull(requiredArgs));
-        this.optionalArgs = ImmutableList.copyOf(Objects.requireNonNull(optionalArgs));
+        this.args = ImmutableList.copyOf(Objects.requireNonNull(args));
         this.description = Objects.requireNonNull(description);
         this.handler = Objects.requireNonNull(handler);
+        validateArgsOrder();
+    }
+
+    private void validateArgsOrder() {
+        for (int i = 0; i < args.size(); i++) {
+            if (i == 0) {
+                continue;
+            }
+            if (args.get(i).isRequired() && args.get(i - 1).isOptional()) {
+                throw new IllegalArgumentException("Found required argument after optional argument");
+            }
+        }
     }
 
     @Override
@@ -49,12 +58,8 @@ public final class CommandNode implements Node {
         return Optional.ofNullable(parent);
     }
 
-    public List<ArgumentInfo> getRequiredArgs() {
-        return requiredArgs;
-    }
-
-    public List<ArgumentInfo> getOptionalArgs() {
-        return optionalArgs;
+    public List<ArgumentInfo> getArgs() {
+        return args;
     }
 
     public String getDescription() {
@@ -79,11 +84,7 @@ public final class CommandNode implements Node {
                 index--;
             }
         }
-        if (index < requiredArgs.size()) {
-            return requiredArgs.get(index);
-        } else {
-            return optionalArgs.get(index - requiredArgs.size());
-        }
+        return args.get(index);
     }
 
     public ArgumentInfo getArgumentAt(final int index) {
@@ -92,26 +93,20 @@ public final class CommandNode implements Node {
 
     public Map<String, String> parseArgs(final List<String> argumentsList, final boolean ignoreNotEnough) throws ArgumentNotEnoughException {
         Objects.requireNonNull(argumentsList);
-        if (requiredArgs.isEmpty() && optionalArgs.isEmpty()) {
+        if (args.isEmpty()) {
             return Collections.emptyMap();
         }
         final Map<String, String> result = new HashMap<>();
         final Iterator<String> iterator = argumentsList.iterator();
-        for (ArgumentInfo requiredName : requiredArgs) {
+        for (ArgumentInfo info : args) {
             if (!iterator.hasNext()) {
-                if (ignoreNotEnough) {
+                if (ignoreNotEnough || !info.isRequired()) {
                     break;
                 } else {
                     throw new ArgumentNotEnoughException();
                 }
             }
-            result.put(requiredName.getName(), iterator.next());
-        }
-        for (ArgumentInfo optionalName : optionalArgs) {
-            if (!iterator.hasNext()) {
-                break;
-            }
-            result.put(optionalName.getName(), iterator.next());
+            result.put(info.getName(), iterator.next());
         }
         if (iterator.hasNext()) {
             result.compute(getArgumentAt(result.size() - 1).getName(), (key, value) -> {
@@ -137,23 +132,21 @@ public final class CommandNode implements Node {
         CommandNode command = (CommandNode) o;
         return Objects.equals(parent, command.parent) &&
             Objects.equals(name, command.name) &&
-            Objects.equals(requiredArgs, command.requiredArgs) &&
-            Objects.equals(optionalArgs, command.optionalArgs) &&
+            Objects.equals(args, command.args) &&
             Objects.equals(description, command.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(parent, name, requiredArgs, optionalArgs, description);
+        return Objects.hash(parent, name, args, description);
     }
 
     @Override
     public String toString() {
-        return "Command{" +
+        return "CommandNode{" +
             "parent=" + parent +
             ", name='" + name + '\'' +
-            ", requiredArgs=" + requiredArgs +
-            ", optionalArgs=" + optionalArgs +
+            ", args=" + args +
             ", description='" + description + '\'' +
             '}';
     }
