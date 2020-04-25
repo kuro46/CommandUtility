@@ -45,10 +45,11 @@ public final class CommandGroup implements TabExecutor {
         });
     }
 
-    public void addCompleter(final String argumentName, final CommandCompleter completer) {
+    public CommandGroup addCompleter(final String argumentName, final CommandCompleter completer) {
         Objects.requireNonNull(argumentName);
         Objects.requireNonNull(completer);
         completerMap.put(argumentName, completer);
+        return this;
     }
 
     public CommandGroup add(final CommandHandler handler, final String command, final String description) {
