@@ -38,10 +38,7 @@ public final class CommandNode implements Node {
     }
 
     private void validateArgsOrder() {
-        for (int i = 0; i < args.size(); i++) {
-            if (i == 0) {
-                continue;
-            }
+        for (int i = 1; i < args.size(); i++) {
             if (args.get(i).isRequired() && args.get(i - 1).isOptional()) {
                 throw new IllegalArgumentException("Found required argument after optional argument");
             }
