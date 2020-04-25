@@ -43,6 +43,13 @@ public class CommandNodeTests {
     }
 
     @Test
+    public void illegalOrderArgsTest() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            createCommand("foo [hoge] <piyo>", "");
+        });
+    }
+
+    @Test
     public void sectionsTestWithSome() {
         final CommandNode cmd = createCommand("foo bar buz", "");
         assertEquals("foo bar buz", cmd.sections());
