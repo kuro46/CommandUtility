@@ -57,7 +57,6 @@ public final class BranchNode implements Node {
         branches.addFirst(this);
         while (true) {
             final BranchNode branch = branches.pollFirst();
-            System.err.println(branch);
             if (branch == null) {
                 break;
             }
