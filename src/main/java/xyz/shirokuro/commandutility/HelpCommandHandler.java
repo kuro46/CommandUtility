@@ -45,9 +45,8 @@ public final class HelpCommandHandler implements CommandHandler {
                     return prefix + info.toString(false) + ChatColor.RESET;
                 })
                 .forEach(sj::add);
-            sj.add("-");
-            sj.add(commandNode.getDescription());
             sender.sendMessage(sj.toString());
+            sender.sendMessage("  - " + commandNode.getDescription());
         }
         if (footer != null) {
             sender.sendMessage(footer);
