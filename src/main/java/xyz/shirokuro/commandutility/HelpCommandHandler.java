@@ -36,7 +36,7 @@ public final class HelpCommandHandler implements CommandHandler {
         }
         for (final CommandNode commandNode : rootBranch.walkNodeTree()) {
             final StringJoiner sj = new StringJoiner(" ");
-            sj.add(ChatColor.GRAY + commandNode.sections() + ChatColor.RESET);
+            sj.add(ChatColor.GRAY + "/" + commandNode.sections() + ChatColor.RESET);
             commandNode.getArgs().stream()
                 .map(info -> {
                     final ChatColor prefix = info.isRequired()
