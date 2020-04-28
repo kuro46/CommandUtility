@@ -182,7 +182,7 @@ public final class CommandGroup implements TabExecutor {
             if (completer != null && executor == null) {
                 throw new IllegalArgumentException("Cannot find executor for '" + command + "'");
             }
-            final ReflectedHandler handler = new ReflectedHandler(o, executor, completer);
+            final ReflectedCommandHandler handler = new ReflectedCommandHandler(o, executor, completer);
             add(handler, command, info.description);
         });
         return this;
@@ -196,42 +196,6 @@ public final class CommandGroup implements TabExecutor {
         private Method executor;
         private Method completer;
         private String description;
-    }
-
-    private static final class ReflectedHandler implements CommandHandler {
-
-        private final Object caller;
-        private final Method executor;
-        private final Method completer;
-
-        public ReflectedHandler(final Object caller, final Method executor, final Method completer) {
-            this.caller = Objects.requireNonNull(caller);
-            this.executor = Objects.requireNonNull(executor);
-            this.completer = completer;
-        }
-
-        @SuppressWarnings("unchecked")
-        private <T> T invokeSilently(final Object caller, final Method method, final Object... args) {
-            try {
-                return (T) method.invoke(caller, args);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public void execute(final ExecutionData data) {
-            invokeSilently(caller, executor, data);
-        }
-
-        @Override
-        public List<String> complete(final CompletionData data) {
-            if (completer != null) {
-                return invokeSilently(caller, completer, data);
-            } else {
-                return Collections.emptyList();
-            }
-        }
     }
 
     @Override
