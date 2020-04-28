@@ -57,14 +57,20 @@ public final class ArgumentInfo {
         return !required;
     }
 
-    @Override
-    public String toString() {
-        final String inner = name + ":" + completerName;
+    public String toString(final boolean includeCompleterName) {
+        final String inner = includeCompleterName
+            ? name + ":" + completerName
+            : name;
         if (required) {
             return "<" + inner + ">";
         } else {
             return "[" + inner + "]";
         }
+    }
+
+    @Override
+    public String toString() {
+        return toString(true);
     }
 
     @Override

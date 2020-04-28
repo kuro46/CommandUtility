@@ -127,9 +127,9 @@ public final class CommandGroup implements TabExecutor {
                 commandNode.getArgs().stream()
                     .map(info -> {
                         if (info.isRequired()) {
-                            return ChatColor.GOLD + "<" + info.getName() + ">" + ChatColor.RESET;
+                            return ChatColor.GOLD + info.toString(false) + ChatColor.RESET;
                         } else {
-                            return ChatColor.YELLOW + "[" + info.getName() + "]" + ChatColor.RESET;
+                            return ChatColor.YELLOW + info.toString(false) + ChatColor.RESET;
                         }
                     })
                 .forEach(sj::add);
@@ -250,13 +250,7 @@ public final class CommandGroup implements TabExecutor {
             parsedArgs = commandNode.parseArgs(findResult.getUnused(), false);
         } catch (CommandNode.ArgumentNotEnoughException e) {
             final String requiredStr = commandNode.getArgs().stream()
-                .map(info -> {
-                    if (info.isRequired()) {
-                        return "<" + info.getName() + ">";
-                    } else {
-                        return "[" + info.getName() + "]";
-                    }
-                })
+                .map(info -> info.toString(false))
                 .collect(Collectors.joining(" "));
             final StringJoiner joiner = new StringJoiner(" ");
             joiner.add(commandNode.sections());
