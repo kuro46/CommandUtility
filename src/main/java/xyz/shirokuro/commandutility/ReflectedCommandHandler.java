@@ -18,10 +18,9 @@ final class ReflectedCommandHandler implements CommandHandler {
         this.completer = completer;
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> T invokeSilently(final Object caller, final Method method, final Object... args) {
+    private Object invokeSilently(final Object caller, final Method method, final Object... args) {
         try {
-            return (T) method.invoke(caller, args);
+            return method.invoke(caller, args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
@@ -32,14 +31,13 @@ final class ReflectedCommandHandler implements CommandHandler {
         invokeSilently(caller, executor, data);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public List<String> complete(final CompletionData data) {
         if (completer != null) {
-            return invokeSilently(caller, completer, data);
+            return (List<String>) invokeSilently(caller, completer, data);
         } else {
             return Collections.emptyList();
         }
     }
 }
-
-
