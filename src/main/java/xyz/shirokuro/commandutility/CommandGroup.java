@@ -149,7 +149,9 @@ public final class CommandGroup implements TabExecutor {
             if (executorAnnotation != null) {
                 ReflectionUtils.assertPublic(method);
                 if (!equalsMethodParams(method, ExecutionData.class)) {
-                    throw new IllegalArgumentException(ReflectionUtils.methodInfo(method) + " is annotated @Executor, but method parameters are incorrect!");
+                    throw new IllegalArgumentException("Method: " +
+                            ReflectionUtils.methodInfo(method) +
+                            " is annotated @Executor, but method parameters are incorrect!");
                 }
                 final ReflectedHandlerInfo info =
                     handlerInfoMap.computeIfAbsent(executorAnnotation.command(), s -> new ReflectedHandlerInfo());
@@ -158,7 +160,9 @@ public final class CommandGroup implements TabExecutor {
             } else if (completerAnnotation != null) {
                 ReflectionUtils.assertPublic(method);
                 if (!equalsMethodParams(method, CompletionData.class)) {
-                    throw new IllegalArgumentException(ReflectionUtils.methodInfo(method) + " is annotated @Completer, but method parameters are incorrect!");
+                    throw new IllegalArgumentException("Method: " +
+                            ReflectionUtils.methodInfo(method) +
+                            " is annotated @Completer, but method parameters are incorrect!");
                 }
                 final ReflectedHandlerInfo info =
                     handlerInfoMap.computeIfAbsent(completerAnnotation.command(), s -> new ReflectedHandlerInfo());

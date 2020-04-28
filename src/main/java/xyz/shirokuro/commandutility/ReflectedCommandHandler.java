@@ -21,8 +21,10 @@ final class ReflectedCommandHandler implements CommandHandler {
     private Object invokeSilently(final Object caller, final Method method, final Object... args) {
         try {
             return method.invoke(caller, args);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
+        } catch (final IllegalAccessException e) {
+            throw new RuntimeException("Cannot access to method: " + ReflectionUtils.methodInfo(method), e);
+        } catch (final InvocationTargetException e) {
+            throw new RuntimeException("Exception occurred in wrapped method" + ReflectionUtils.methodInfo(method), e.getCause());
         }
     }
 

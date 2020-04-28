@@ -16,7 +16,7 @@ final class ReflectionUtils {
      */
     public static String methodInfo(final Method method) {
         Objects.requireNonNull(method, "method");
-        return "Method: '" + method.getName() + "' in '" + method.getDeclaringClass().getName() + "'";
+        return "'" + method.getName() + "' in '" + method.getDeclaringClass().getName() + "'";
     }
 
     /**
