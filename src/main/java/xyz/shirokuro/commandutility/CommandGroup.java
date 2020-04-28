@@ -140,16 +140,6 @@ public final class CommandGroup implements TabExecutor {
         }, root + " help", "Show this message");
     }
 
-    private void assertPublic(final Method method) {
-        if (!Modifier.isPublic(method.getModifiers())) {
-            throw new IllegalArgumentException(methodInfo(method) + " is not public!");
-        }
-    }
-
-    private String methodInfo(final Method method) {
-        return "Method: '" + method.getName() + "' in '" + method.getDeclaringClass().getName() + "'";
-    }
-
     public CommandGroup addAll(final Object o) {
         final Map<String, ReflectedHandlerInfo> handlerInfoMap = new HashMap<>();
         // find all annotated methods
@@ -157,18 +147,18 @@ public final class CommandGroup implements TabExecutor {
             final Executor executorAnnotation = method.getAnnotation(Executor.class);
             final Completer completerAnnotation = method.getAnnotation(Completer.class);
             if (executorAnnotation != null) {
-                assertPublic(method);
+                ReflectionUtils.assertPublic(method);
                 if (!equalsMethodParams(method, ExecutionData.class)) {
-                    throw new IllegalArgumentException(methodInfo(method) + " is annotated @Executor, but method parameters are incorrect!");
+                    throw new IllegalArgumentException(ReflectionUtils.methodInfo(method) + " is annotated @Executor, but method parameters are incorrect!");
                 }
                 final ReflectedHandlerInfo info =
                     handlerInfoMap.computeIfAbsent(executorAnnotation.command(), s -> new ReflectedHandlerInfo());
                 info.executor = method;
                 info.description = executorAnnotation.description();
             } else if (completerAnnotation != null) {
-                assertPublic(method);
+                ReflectionUtils.assertPublic(method);
                 if (!equalsMethodParams(method, CompletionData.class)) {
-                    throw new IllegalArgumentException(methodInfo(method) + " is annotated @Completer, but method parameters are incorrect!");
+                    throw new IllegalArgumentException(ReflectionUtils.methodInfo(method) + " is annotated @Completer, but method parameters are incorrect!");
                 }
                 final ReflectedHandlerInfo info =
                     handlerInfoMap.computeIfAbsent(completerAnnotation.command(), s -> new ReflectedHandlerInfo());
