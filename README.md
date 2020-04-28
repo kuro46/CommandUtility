@@ -1,6 +1,6 @@
 日本語 | [English](docs/README_EN.md)
 
-# CommandUtility
+# CommandUtility [![Latest release](https://img.shields.io/github/v/release/kuro46/CommandUtility)](https://github.com/kuro46/CommandUtility/releases)[![GitHub Workflows](https://github.com/kuro46/CommandUtility/workflows/Build/badge.svg)](https://github.com/kuro46/CommandUtility/actions)
 
 CommandUtilityは、Bukkitでのコマンド処理を改善するために開発されたライブラリです。  
 独自のコマンドハンドラを使用することで、コマンドの実行処理や、Tab補完機能が簡単に実装できるようになります。
