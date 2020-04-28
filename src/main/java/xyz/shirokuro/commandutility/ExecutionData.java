@@ -9,14 +9,20 @@ import java.util.Objects;
 
 public final class ExecutionData {
 
+    private final CommandGroup group;
     private final CommandSender sender;
     private final CommandNode command;
     private final Map<String, String> args;
 
-    public ExecutionData(CommandSender sender, CommandNode command, Map<String, String> args) {
+    public ExecutionData(CommandGroup group, CommandSender sender, CommandNode command, Map<String, String> args) {
+        this.group = Objects.requireNonNull(group);
         this.sender = Objects.requireNonNull(sender);
         this.command = Objects.requireNonNull(command);
         this.args = ImmutableMap.copyOf(Objects.requireNonNull(args));
+    }
+
+    public CommandGroup getGroup() {
+        return group;
     }
 
     public CommandSender getSender() {

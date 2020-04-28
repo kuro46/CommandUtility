@@ -21,8 +21,6 @@ public final class CommandGroup implements TabExecutor {
     private final Map<String, CommandCompleter> completerMap = new HashMap<>();
     private final BranchNode root = new BranchNode("root");
     private final String errorPrefix;
-    private boolean generateHelp = false;
-    private String helpHeader = null;
 
     public CommandGroup(final String errorPrefix) {
         this.errorPrefix = Objects.requireNonNull(errorPrefix);
@@ -50,12 +48,6 @@ public final class CommandGroup implements TabExecutor {
                 .filter(s -> s.startsWith(data.getCurrentValue()))
                 .collect(Collectors.toList());
         });
-    }
-
-    public CommandGroup generateHelp(final String header) {
-        generateHelp = true;
-        helpHeader = Objects.requireNonNull(header);
-        return this;
     }
 
     public CommandGroup addCompleter(final String argumentName, final CommandCompleter completer) {
@@ -109,35 +101,8 @@ public final class CommandGroup implements TabExecutor {
                 }
                 pluginCommand.setExecutor(this);
             }
-            if (generateHelp) {
-                registerHelp(sections.get(0));
-            }
         }
         return this;
-    }
-
-    private void registerHelp(final String root) {
-        add(data -> {
-            final BranchNode rootBranch = getRoot();
-            final CommandSender sender = data.getSender();
-            sender.sendMessage(helpHeader);
-            for (final CommandNode commandNode : rootBranch.walkNodeTree()) {
-                final StringJoiner sj = new StringJoiner(" ");
-                sj.add(ChatColor.GRAY + commandNode.sections() + ChatColor.RESET);
-                commandNode.getArgs().stream()
-                    .map(info -> {
-                        if (info.isRequired()) {
-                            return ChatColor.GOLD + info.toString(false) + ChatColor.RESET;
-                        } else {
-                            return ChatColor.YELLOW + info.toString(false) + ChatColor.RESET;
-                        }
-                    })
-                .forEach(sj::add);
-                sj.add("-");
-                sj.add(commandNode.getDescription());
-                sender.sendMessage(sj.toString());
-            }
-        }, root + " help", "Show this message");
     }
 
     public CommandGroup addAll(final Object o) {
@@ -216,7 +181,7 @@ public final class CommandGroup implements TabExecutor {
             sender.sendMessage(errorPrefix + "Usage: /" + joiner.toString());
             return true;
         }
-        commandNode.getHandler().execute(new ExecutionData(sender, commandNode, parsedArgs));
+        commandNode.getHandler().execute(new ExecutionData(this, sender, commandNode, parsedArgs));
         return true;
     }
 
