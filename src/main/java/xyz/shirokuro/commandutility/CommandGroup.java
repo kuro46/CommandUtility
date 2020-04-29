@@ -5,7 +5,6 @@ import com.google.common.collect.Iterables;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.command.PluginCommand;
@@ -58,51 +57,43 @@ public final class CommandGroup implements TabExecutor {
         return this;
     }
 
-    public CommandGroup add(final CommandHandler handler, final String command, final String description) {
-        Objects.requireNonNull(command);
-        Objects.requireNonNull(description);
-        Objects.requireNonNull(handler);
-        if (command.trim().isEmpty()) {
-            throw new IllegalArgumentException("command is empty!");
-        }
-        final List<ArgumentInfo> args = new ArrayList<>();
-        final List<String> sections = new ArrayList<>();
-        for (final String part : Splitter.on(' ').split(command)) {
-            final Optional<ArgumentInfo> optionalInfo = ArgumentInfo.fromString(part);
-            if (optionalInfo.isPresent()) {
-                args.add(optionalInfo.get());
-            } else {
-                if (!args.isEmpty()) {
-                    throw new RuntimeException("Found command part after argument part");
-                }
-                sections.add(part);
-            }
-        }
-        if (sections.isEmpty()) {
-            throw new IllegalArgumentException("No sections exists!");
-        }
-        final boolean firstTime = !root.getChildren().containsKey(sections.get(0));
+    public CommandGroup add(final Command command) {
+        Objects.requireNonNull(command, "command");
+        final String firstSection = command.getSections().get(0);
+        final boolean firstTime = !root.getChildren().containsKey(firstSection);
+        // Insert Command to tree
         BranchNode current = root;
-        for (int i = 0; i < sections.size(); i++) {
-            final String section = sections.get(i);
-            if (i < sections.size() - 1) {
+        final Iterator<String> sectionIter = command.getSections().iterator();
+        while (sectionIter.hasNext()) {
+            final String section = sectionIter.next();
+            if (sectionIter.hasNext()) {
                 current = current.branch(section);
             } else {
-                current.addChild(new CommandNode(current, section, args, description, handler));
+                current.addChild(new CommandNode(current, section, command));
             }
         }
+        // First time process
         if (firstTime) {
             // null-check for unit testing
             // Register to Bukkit API
             if (Bukkit.getServer() != null) {
-                final PluginCommand pluginCommand = Bukkit.getPluginCommand(sections.get(0));
+                final PluginCommand pluginCommand = Bukkit.getPluginCommand(firstSection);
                 if (pluginCommand == null) {
-                    throw new IllegalArgumentException("Command: " + sections.get(0) +
+                    throw new IllegalArgumentException("Command: " + firstSection +
                             " is not registered by any plugins");
                 }
                 pluginCommand.setExecutor(this);
             }
         }
+        return this;
+    }
+
+    public CommandGroup add(final CommandHandler handler, final String command, final String description) {
+        final Command result = Command.fromString(handler, command, description);
+        if (result.getSections().isEmpty()) {
+            throw new IllegalArgumentException("Section is empty!");
+        }
+        add(result);
         return this;
     }
 
@@ -155,7 +146,7 @@ public final class CommandGroup implements TabExecutor {
     }
 
     @Override
-    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+    public boolean onCommand(final CommandSender sender, final org.bukkit.command.Command command, final String label, final String[] args) {
         final List<String> normalized = new ArrayList<>();
         normalized.add(command.getName());
         normalized.addAll(Arrays.asList(args));
@@ -168,19 +159,19 @@ public final class CommandGroup implements TabExecutor {
         final CommandNode commandNode = findResult.getCommand().get();
         final Map<String, String> parsedArgs;
         try {
-            parsedArgs = commandNode.parseArgs(findResult.getUnreachablePaths(), false);
-        } catch (CommandNode.ArgumentNotEnoughException e) {
-            final String requiredStr = commandNode.getArgs().stream()
+            parsedArgs = commandNode.getCommand().parseArgs(findResult.getUnreachablePaths(), false);
+        } catch (Command.ArgumentNotEnoughException e) {
+            final String requiredStr = commandNode.getCommand().getArgs().stream()
                 .map(info -> info.toString(false))
                 .collect(Collectors.joining(" "));
             final StringJoiner joiner = new StringJoiner(" ");
-            joiner.add(commandNode.sections());
+            commandNode.getCommand().getSections().forEach(joiner::add);
             joiner.add(requiredStr);
             sender.sendMessage(errorPrefix + "Usage: /" + joiner.toString());
             return true;
         }
         try {
-            commandNode.getHandler().execute(new ExecutionData(this, sender, commandNode, parsedArgs));
+            commandNode.getCommand().getHandler().execute(new ExecutionData(this, sender, commandNode, parsedArgs));
         } catch (final CommandExecutionException e) {
             final String message = e.getMessage();
             if (message != null) {
@@ -191,7 +182,7 @@ public final class CommandGroup implements TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command command, String alias, String[] args) {
         final List<String> normalized = new ArrayList<>();
         normalized.add(command.getName());
         for (String arg : args) {
@@ -210,19 +201,19 @@ public final class CommandGroup implements TabExecutor {
                 .collect(Collectors.toList());
         } else {
             final CommandNode commandNode = findResult.getCommand().get();
-            final ArgumentInfo argumentInfo = commandNode.getArgs().get(
-                    Math.min(commandNode.getArgs().size() - 1,
+            final ArgumentInfo argumentInfo = commandNode.getCommand().getArgs().get(
+                    Math.min(commandNode.getCommand().getArgs().size() - 1,
                         findResult.getUnreachablePaths().size()));
             final String argumentName = argumentInfo.getName();
             try {
                 final List<String> argsForParse = new ArrayList<>(findResult.getUnreachablePaths());
                 argsForParse.add(completing);
-                final String argumentValue = commandNode.parseArgs(argsForParse, true).get(argumentName);
+                final String argumentValue = commandNode.getCommand().parseArgs(argsForParse, true).get(argumentName);
                 final CommandCompleter completer = argumentInfo.getCompleterName()
                     .map(completerMap::get)
-                    .orElse(commandNode.getHandler());
+                    .orElse(commandNode.getCommand().getHandler());
                 return completer.complete(new CompletionData(sender, commandNode, argumentName, argumentValue));
-            } catch (CommandNode.ArgumentNotEnoughException e) {
+            } catch (Command.ArgumentNotEnoughException e) {
                 throw new RuntimeException("unreachable", e);
             }
         }

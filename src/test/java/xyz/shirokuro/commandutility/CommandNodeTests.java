@@ -25,9 +25,11 @@ public class CommandNodeTests {
         final List<ArgumentInfo> infoList = Arrays.asList(ArgumentInfo.fromString("<hoge>").get(), ArgumentInfo.fromString("[piyo]").get());
         final CommandNode cmd2 = new CommandNode(new BranchNode("root").branch("foo").branch("bar"),
             "buz",
-            infoList,
-            "",
-            NOOP_HANDLER);
+            new Command(
+                Arrays.asList("foo", "bar", "buz"),
+                infoList,
+                NOOP_HANDLER,
+                ""));
         assertEquals(cmd1, cmd2);
     }
 
@@ -36,9 +38,10 @@ public class CommandNodeTests {
         final CommandNode cmd1 = createCommand("foo", "");
         final CommandNode cmd2 = new CommandNode(new BranchNode("root"),
             "foo",
-            Collections.emptyList(),
-            "",
-            NOOP_HANDLER);
+            new Command(
+                Arrays.asList("foo"),
+                Collections.emptyList(),
+                NOOP_HANDLER, ""));
         assertEquals(cmd1, cmd2);
     }
 
@@ -51,31 +54,19 @@ public class CommandNodeTests {
 
     @Test
     public void sectionsTestWithSome() {
-        final CommandNode cmd = createCommand("foo bar buz", "");
-        assertEquals("foo bar buz", cmd.sections());
-    }
-
-    @Test
-    public void getArgumentAtTestWithRequiredRange() {
-        final CommandNode cmd = createCommand("foo <bar> [buz]", "");
-        assertEquals(new ArgumentInfo("bar", null, true), cmd.getArgumentAt(0));
-    }
-
-    @Test
-    public void getArgumentAtTestWithOptionalRange() {
-        final CommandNode cmd = createCommand("foo <bar> [buz]", "");
-        assertEquals(new ArgumentInfo("buz", null, false), cmd.getArgumentAt(1));
+        final Command cmd = createCommand("foo bar buz", "").getCommand();
+        assertEquals("foo bar buz", String.join(" ", cmd.getSections()));
     }
 
     @Test
     public void parseArgsTestWithRequiredOnlyAndSomeNotEnoughInput() {
-        final CommandNode cmd = createCommand("foo <foo> <bar>", "");
-        assertThrows(CommandNode.ArgumentNotEnoughException.class, () -> cmd.parseArgs(Collections.singletonList("val1"), false));
+        final Command cmd = createCommand("foo <foo> <bar>", "").getCommand();
+        assertThrows(Command.ArgumentNotEnoughException.class, () -> cmd.parseArgs(Collections.singletonList("val1"), false));
     }
 
     @Test
     public void parseArgsTestWithOptionalOnlyAndSomeNotEnoughInput() {
-        final CommandNode cmd = createCommand("foo [foo] [bar]", "");
+        final Command cmd = createCommand("foo [foo] [bar]", "").getCommand();
         assertDoesNotThrow(() -> {
             final Map<String, String> result = cmd.parseArgs(Collections.singletonList("val1"), false);
             assertEquals("val1", result.get("foo"));
@@ -84,13 +75,13 @@ public class CommandNodeTests {
 
     @Test
     public void parseArgsTestWithRequiredOnlyAndNoInput() {
-        final CommandNode cmd = createCommand("foo <foo> <bar>", "");
-        assertThrows(CommandNode.ArgumentNotEnoughException.class, () -> cmd.parseArgs(Collections.emptyList(), false));
+        final Command cmd = createCommand("foo <foo> <bar>", "").getCommand();
+        assertThrows(Command.ArgumentNotEnoughException.class, () -> cmd.parseArgs(Collections.emptyList(), false));
     }
 
     @Test
     public void parseArgsTestWithNoArgsAndSomeInput() {
-        final CommandNode cmd = createCommand("foo", "");
+        final Command cmd = createCommand("foo", "").getCommand();
         assertDoesNotThrow(() -> {
             cmd.parseArgs(Arrays.asList("val1", "val2"), false);
         });
@@ -99,7 +90,7 @@ public class CommandNodeTests {
     @ParameterizedTest
     @ValueSource(strings = {"foo <foo> <bar>", "foo [foo] [bar]"})
     public void parseArgsTestWithRequiredOnlyAndCorrect(final String command) {
-        final CommandNode cmd = createCommand(command, "");
+        final Command cmd = createCommand(command, "").getCommand();
         assertDoesNotThrow(() -> {
             final Map<String, String> result = cmd.parseArgs(Arrays.asList("val1", "val2"), false);
             assertEquals("val1", result.get("foo"));
@@ -110,7 +101,7 @@ public class CommandNodeTests {
     @ParameterizedTest
     @ValueSource(strings = {"foo <foo> <bar>", "foo [foo] [bar]"})
     public void parseArgsTestWithRequiredOnlyAndManyArgs(final String command) {
-        final CommandNode cmd = createCommand(command, "");
+        final Command cmd = createCommand(command, "").getCommand();
         assertDoesNotThrow(() -> {
             final Map<String, String> result = cmd.parseArgs(Arrays.asList("val1", "val2", "val3"), false);
             assertEquals("val1", result.get("foo"));

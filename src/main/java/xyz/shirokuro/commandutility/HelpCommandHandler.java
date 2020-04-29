@@ -35,9 +35,10 @@ public final class HelpCommandHandler implements CommandHandler {
             sender.sendMessage(header);
         }
         for (final CommandNode commandNode : rootBranch.walkNodeTree()) {
+            final Command command = commandNode.getCommand();
             final StringJoiner sj = new StringJoiner(" ");
-            sj.add(ChatColor.GRAY + "/" + commandNode.sections() + ChatColor.RESET);
-            commandNode.getArgs().stream()
+            sj.add(ChatColor.GRAY + "/" + command.getSections() + ChatColor.RESET);
+            command.getArgs().stream()
                 .map(info -> {
                     final ChatColor prefix = info.isRequired()
                         ? ChatColor.GOLD
@@ -46,7 +47,7 @@ public final class HelpCommandHandler implements CommandHandler {
                 })
                 .forEach(sj::add);
             sender.sendMessage(sj.toString());
-            sender.sendMessage("  - " + commandNode.getDescription());
+            sender.sendMessage("  - " + command.getDescription());
         }
         if (footer != null) {
             sender.sendMessage(footer);

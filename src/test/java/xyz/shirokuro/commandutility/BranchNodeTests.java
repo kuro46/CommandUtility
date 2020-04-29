@@ -54,7 +54,10 @@ public final class BranchNodeTests {
             "b a b\n" +
             "b b a\n" +
             "b b b";
-        final String actual = nodes.stream().map(CommandNode::sections).collect(Collectors.joining("\n"));
+        final String actual = nodes.stream()
+            .map(CommandNode::getCommand)
+            .map(cmd -> String.join(" ", cmd.getSections()))
+            .collect(Collectors.joining("\n"));
         assertEquals(expect, actual);
     }
 
