@@ -49,4 +49,27 @@ final class ReflectedCommandHandler implements CommandHandler {
             return Collections.emptyList();
         }
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(caller, executor, completer);
+    }
+
+    @Override
+    public boolean equals(final Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        final ReflectedCommandHandler rch = (ReflectedCommandHandler) other;
+        return Objects.equals(caller, rch.caller) &&
+            Objects.equals(executor, rch.executor) &&
+            Objects.equals(completer, rch.completer);
+    }
+
+    @Override
+    public String toString() {
+        return "ReflectedCommandHandler{caller='" + caller +
+            "',executor='" + executor +
+            "',completer='" + completer +
+            "'}";
+    }
 }
