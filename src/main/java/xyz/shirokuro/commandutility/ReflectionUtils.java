@@ -39,7 +39,7 @@ final class ReflectionUtils {
     public static void assertPublic(final Method method) {
         Objects.requireNonNull(method, "method");
         if (!Modifier.isPublic(method.getModifiers())) {
-            throw new IllegalArgumentException(methodInfo(method) + " is not public!");
+            throw new IllegalArgumentException("Method: " + methodInfo(method) + " is not public!");
         }
     }
 }
