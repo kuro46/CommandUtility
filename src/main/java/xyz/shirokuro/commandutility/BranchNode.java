@@ -1,7 +1,10 @@
 package xyz.shirokuro.commandutility;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -88,6 +91,37 @@ public final class BranchNode implements Node {
         }
     }
 
+    public WalkResult walk(final String... paths) {
+        return walk(Arrays.asList(paths));
+    }
+
+    public WalkResult walk(final List<String> paths) {
+        final Deque<String> pathQueue = new ArrayDeque<>(paths);
+        final List<BranchNode> branches = new ArrayList<>(paths.size());
+        CommandNode commandNode = null;
+        BranchNode current = this;
+        while (true) {
+            final String path = pathQueue.peekFirst();
+            if (path == null) {
+                break;
+            }
+            final Node child = current.getChildren().get(path);
+            if (child == null) {
+                break;
+            }
+            pathQueue.removeFirst();
+            if (child instanceof BranchNode) {
+                final BranchNode cb = (BranchNode) child;
+                branches.add(cb);
+                current = cb;
+            } else {
+                commandNode = (CommandNode) child;
+                break;
+            }
+        }
+        return new WalkResult(branches, pathQueue, commandNode);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -108,5 +142,87 @@ public final class BranchNode implements Node {
             "name='" + name + '\'' +
             ", parent=" + parent +
             '}';
+    }
+
+    public static final class WalkResult {
+
+        private final List<BranchNode> branches;
+        private final List<String> unreachablePaths;
+        private final CommandNode command;
+
+        public WalkResult(final Collection<BranchNode> branches, final Collection<String> unreachablePaths, final CommandNode command) {
+            Objects.requireNonNull(branches, "branches");
+            Objects.requireNonNull(unreachablePaths, "unreachablePaths");
+            this.branches = ImmutableList.copyOf(branches);
+            this.unreachablePaths = ImmutableList.copyOf(unreachablePaths);
+            this.command = command;
+        }
+
+        /**
+         * Returns reached branches.
+         *
+         * @return list of branches. First element is a first path
+         */
+        public List<BranchNode> getBranches() {
+            return branches;
+        }
+
+        /**
+         * Returns unreachable paths.
+         *
+         * @return list of paths. Last element is a last path
+         */
+        public List<String> getUnreachablePaths() {
+            return unreachablePaths;
+        }
+
+        /**
+         * Returns reached nodes.
+         *
+         * @return list of nodes. May be last element is {@code CommandNode}
+         */
+        public List<Node> getReachedNodes() {
+            final ImmutableList.Builder<Node> result = ImmutableList.builder();
+            result.addAll(branches);
+            if (command != null) {
+                result.add(command);
+            }
+            return result.build();
+        }
+
+        /**
+         * Returns {@code CommandNode} if reached to it. Otherwise empty.
+         *
+         * @return {@code CommandNode} or empty
+         */
+        public Optional<CommandNode> getCommand() {
+            return Optional.ofNullable(command);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(command, unreachablePaths, branches);
+        }
+
+        @Override
+        public boolean equals(final Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other == null || !(other instanceof WalkResult)) {
+                return false;
+            }
+            final WalkResult co = (WalkResult) other;
+            return Objects.equals(command, co.command) &&
+                Objects.equals(unreachablePaths, co.unreachablePaths) &&
+                Objects.equals(branches, co.branches);
+        }
+
+        @Override
+        public String toString() {
+            return "WalkResult{branches:'" + branches +
+                "',unreachablePaths:'" + unreachablePaths +
+                "',command:'" + command + "'}";
+        }
     }
 }

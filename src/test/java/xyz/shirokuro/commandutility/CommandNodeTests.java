@@ -121,6 +121,6 @@ public class CommandNodeTests {
     private CommandNode createCommand(final String command, final String description) {
         final CommandGroup group = new CommandGroup()
             .add(NOOP_HANDLER, command, description);
-        return (CommandNode) group.findCommand(Splitter.on(' ').splitToList(command)).getNode();
+        return group.getRoot().walk(Splitter.on(' ').splitToList(command)).getCommand().get();
     }
 }

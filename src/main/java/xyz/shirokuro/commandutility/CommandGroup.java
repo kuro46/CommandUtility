@@ -1,6 +1,7 @@
 package xyz.shirokuro.commandutility;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -162,15 +163,16 @@ public final class CommandGroup implements TabExecutor {
         final List<String> normalized = new ArrayList<>();
         normalized.add(command.getName());
         normalized.addAll(Arrays.asList(args));
-        final FindResult findResult = findCommand(normalized);
-        if (findResult.getNode() instanceof BranchNode) {
-            sender.sendMessage(errorPrefix + "Candidates: " + String.join(", ", ((BranchNode) findResult.getNode()).getChildren().keySet()));
+        final BranchNode.WalkResult findResult = root.walk(normalized);
+        if (!findResult.getCommand().isPresent()) {
+            sender.sendMessage(errorPrefix + "Candidates: " +
+                    String.join(", ", Iterables.getLast(findResult.getBranches()).getChildren().keySet()));
             return true;
         }
-        final CommandNode commandNode = (CommandNode) findResult.getNode();
+        final CommandNode commandNode = findResult.getCommand().get();
         final Map<String, String> parsedArgs;
         try {
-            parsedArgs = commandNode.parseArgs(findResult.getUnused(), false);
+            parsedArgs = commandNode.parseArgs(findResult.getUnreachablePaths(), false);
         } catch (CommandNode.ArgumentNotEnoughException e) {
             final String requiredStr = commandNode.getArgs().stream()
                 .map(info -> info.toString(false))
@@ -205,17 +207,19 @@ public final class CommandGroup implements TabExecutor {
             normalized.add("");
         }
         final String completing = normalized.get(normalized.size() - 1);
-        final FindResult findResult = findCommand(normalized.subList(0, normalized.size() - 1) /* Remove completing argument*/);
-        if (findResult.getNode() instanceof BranchNode) {
-            return ((BranchNode) findResult.getNode()).getChildren().keySet().stream()
+        final BranchNode.WalkResult findResult = root.walk(normalized.subList(0, normalized.size() - 1) /* Remove completing argument*/);
+        if (!findResult.getCommand().isPresent()) {
+            return Iterables.getLast(findResult.getBranches()).getChildren().keySet().stream()
                 .filter(s -> s.startsWith(completing))
                 .collect(Collectors.toList());
         } else {
-            final CommandNode commandNode = (CommandNode) findResult.getNode();
-            final ArgumentInfo argumentInfo = commandNode.getArgs().get(Math.min(commandNode.getArgs().size() - 1, findResult.getUnused().size()));
+            final CommandNode commandNode = findResult.getCommand().get();
+            final ArgumentInfo argumentInfo = commandNode.getArgs().get(
+                    Math.min(commandNode.getArgs().size() - 1,
+                        findResult.getUnreachablePaths().size()));
             final String argumentName = argumentInfo.getName();
             try {
-                final List<String> argsForParse = new ArrayList<>(findResult.getUnused());
+                final List<String> argsForParse = new ArrayList<>(findResult.getUnreachablePaths());
                 argsForParse.add(completing);
                 final String argumentValue = commandNode.parseArgs(argsForParse, true).get(argumentName);
                 final CommandCompleter completer = argumentInfo.getCompleterName()
@@ -225,47 +229,6 @@ public final class CommandGroup implements TabExecutor {
             } catch (CommandNode.ArgumentNotEnoughException e) {
                 throw new RuntimeException("unreachable", e);
             }
-        }
-    }
-
-    public FindResult findCommand(final List<String> list) {
-        Node currentNode = root;
-        boolean decided = false;
-        final List<String> unused = new ArrayList<>();
-        for (String s : list) {
-            if (decided) {
-                unused.add(s);
-            } else {
-                Node temp = ((BranchNode) currentNode).getChildren().get(s);
-                if (temp == null) {
-                    decided = true;
-                } else {
-                    if (temp instanceof CommandNode) {
-                        decided = true;
-                    }
-                    currentNode = temp;
-                }
-            }
-        }
-        return new FindResult(currentNode, unused);
-    }
-
-    public static final class FindResult {
-
-        private final Node node;
-        private final List<String> unused;
-
-        public FindResult(final Node node, final List<String> unused) {
-            this.node = node;
-            this.unused = unused;
-        }
-
-        public Node getNode() {
-            return node;
-        }
-
-        public List<String> getUnused() {
-            return unused;
         }
     }
 }

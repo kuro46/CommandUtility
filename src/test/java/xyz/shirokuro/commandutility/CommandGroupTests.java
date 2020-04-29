@@ -1,5 +1,6 @@
 package xyz.shirokuro.commandutility;
 
+import com.google.common.collect.Iterables;
 import org.junit.jupiter.api.Test;
 import xyz.shirokuro.commandutility.annotation.Completer;
 import xyz.shirokuro.commandutility.annotation.Executor;
@@ -10,39 +11,6 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CommandGroupTests {
-    private static final CommandHandler NOOP_HANDLER = CommandGroupTests::noopHandler;
-
-    private static void noopHandler(ExecutionData data) {
-    }
-
-    @Test
-    public void findCommandTestWithSomeCommands() {
-        final CommandGroup.FindResult foundData = new CommandGroup()
-            .add(NOOP_HANDLER, "foo bar", "")
-            .add(NOOP_HANDLER, "foo buz", "")
-            .findCommand(Arrays.asList("foo", "bar", "buz"));
-        assertTrue(foundData.getNode() instanceof CommandNode);
-        assertEquals(Collections.singletonList("buz"), foundData.getUnused());
-    }
-
-    @Test
-    public void findCommandTestWithTooManyCandidates() {
-        final CommandGroup.FindResult foundData = new CommandGroup()
-            .add(NOOP_HANDLER, "foo bar hoge", "")
-            .add(NOOP_HANDLER, "foo bar buz", "")
-            .findCommand(Arrays.asList("foo", "bar"));
-        assertTrue(foundData.getNode() instanceof BranchNode);
-        assertEquals(2, ((BranchNode) foundData.getNode()).getChildren().size());
-    }
-
-    @Test
-    public void findCommandTestFallback() {
-        final CommandGroup.FindResult foundData = new CommandGroup()
-            .add(NOOP_HANDLER, "foo bar", "")
-            .findCommand(Arrays.asList("foo", "ba"));
-        assertEquals("foo", foundData.getNode().getName());
-    }
-
     @Test
     public void addAllTestExecutorAndCompleter() {
         assertDoesNotThrow(() -> new CommandGroup().addAll(new AnnotationExecutorAndCompleter()));
