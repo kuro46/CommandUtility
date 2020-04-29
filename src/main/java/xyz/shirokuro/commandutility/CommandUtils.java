@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import xyz.shirokuro.commandutility.CommandExecutionException;
@@ -126,5 +127,28 @@ public final class CommandUtils {
      */
     public static Player toPlayer(final String data) throws CommandExecutionException {
         return toPlayer(data, "Cannot find player '<data>'");
+    }
+
+    /**
+     * Converts {@code data} to {@code World}. If failure, throw {@code CommandExecutionException} with specified message.
+     *
+     * @param message exception message. {@code &lt;data&gt;} will be replaced to {@code data}.
+     */
+    public static World toWorld(final String data, final String message) throws CommandExecutionException {
+        Objects.requireNonNull(data, "data");
+        Objects.requireNonNull(message, "message");
+        final World world = Bukkit.getWorld(data);
+        if (world == null) {
+            throw new CommandExecutionException(data.replace("<data>", data));
+        }
+        return world;
+    }
+
+    /**
+     * {@code toWorld} with default message.
+     * @see toWorld
+     */
+    public static World toWorld(final String data) throws CommandExecutionException {
+        return toWorld(data, "Cannot find world '<data>'");
     }
 }
