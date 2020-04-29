@@ -62,12 +62,12 @@ publishing {
     }
 
     repositories {
-        if (version.endsWith("SNAPSHOT")) {
+        if (version.endsWith('SNAPSHOT')) {
             mavenLocal()
         } else {
             maven {
-                def publishRootDir = project.hasProperty("commandutility.publish.rootdir")
-                    ? project.getProperty("commandutility.publish.rootdir").toString()
+                def publishRootDir = project.hasProperty('commandutility.publish.rootdir')
+                    ? project.getProperty('commandutility.publish.rootdir').toString()
                     : buildDir.toString()
                 url = "$publishRootDir/repos/releases"
             }
