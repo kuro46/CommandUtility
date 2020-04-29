@@ -111,6 +111,7 @@ public final class CommandUtils {
     public static Player toPlayer(final String data, final String message) throws CommandExecutionException {
         Objects.requireNonNull(data, "data");
         Objects.requireNonNull(message, "message");
+        @SuppressWarnings("deprecation")
         final Player player = Bukkit.getPlayer(data);
         if (player == null) {
             throw new CommandExecutionException(data.replace("<data>", data));
