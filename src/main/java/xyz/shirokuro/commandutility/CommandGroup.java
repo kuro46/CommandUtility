@@ -146,9 +146,9 @@ public final class CommandGroup implements TabExecutor {
     }
 
     @Override
-    public boolean onCommand(final CommandSender sender, final org.bukkit.command.Command command, final String label, final String[] args) {
+    public boolean onCommand(final CommandSender sender, final org.bukkit.command.Command bukkitCommand, final String label, final String[] args) {
         final List<String> normalized = new ArrayList<>();
-        normalized.add(command.getName());
+        normalized.add(bukkitCommand.getName());
         normalized.addAll(Arrays.asList(args));
         final BranchNode.WalkResult findResult = root.walk(normalized);
         if (!findResult.getCommand().isPresent()) {
@@ -157,21 +157,22 @@ public final class CommandGroup implements TabExecutor {
             return true;
         }
         final CommandNode commandNode = findResult.getCommand().get();
+        final Command command = commandNode.getCommand();
         final Map<String, String> parsedArgs;
         try {
-            parsedArgs = commandNode.getCommand().parseArgs(findResult.getUnreachablePaths(), false);
+            parsedArgs = command.parseArgs(findResult.getUnreachablePaths(), false);
         } catch (Command.ArgumentNotEnoughException e) {
-            final String requiredStr = commandNode.getCommand().getArgs().stream()
+            final String requiredStr = command.getArgs().stream()
                 .map(info -> info.toString(false))
                 .collect(Collectors.joining(" "));
             final StringJoiner joiner = new StringJoiner(" ");
-            commandNode.getCommand().getSections().forEach(joiner::add);
+            command.getSections().forEach(joiner::add);
             joiner.add(requiredStr);
             sender.sendMessage(errorPrefix + "Usage: /" + joiner.toString());
             return true;
         }
         try {
-            commandNode.getCommand().getHandler().execute(new ExecutionData(this, sender, commandNode, parsedArgs));
+            command.getHandler().execute(new ExecutionData(this, sender, commandNode, parsedArgs));
         } catch (final CommandExecutionException e) {
             final String message = e.getMessage();
             if (message != null) {
@@ -182,9 +183,9 @@ public final class CommandGroup implements TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command command, String alias, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command bukkitCommand, String alias, String[] args) {
         final List<String> normalized = new ArrayList<>();
-        normalized.add(command.getName());
+        normalized.add(bukkitCommand.getName());
         for (String arg : args) {
             if (!arg.isEmpty()) {
                 normalized.add(arg);
@@ -201,17 +202,18 @@ public final class CommandGroup implements TabExecutor {
                 .collect(Collectors.toList());
         } else {
             final CommandNode commandNode = findResult.getCommand().get();
-            final ArgumentInfo argumentInfo = commandNode.getCommand().getArgs().get(
-                    Math.min(commandNode.getCommand().getArgs().size() - 1,
+            final Command command = commandNode.getCommand();
+            final ArgumentInfo argumentInfo = command.getArgs().get(
+                    Math.min(command.getArgs().size() - 1,
                         findResult.getUnreachablePaths().size()));
             final String argumentName = argumentInfo.getName();
             try {
                 final List<String> argsForParse = new ArrayList<>(findResult.getUnreachablePaths());
                 argsForParse.add(completing);
-                final String argumentValue = commandNode.getCommand().parseArgs(argsForParse, true).get(argumentName);
+                final String argumentValue = command.parseArgs(argsForParse, true).get(argumentName);
                 final CommandCompleter completer = argumentInfo.getCompleterName()
                     .map(completerMap::get)
-                    .orElse(commandNode.getCommand().getHandler());
+                    .orElse(command.getHandler());
                 return completer.complete(new CompletionData(sender, commandNode, argumentName, argumentValue));
             } catch (Command.ArgumentNotEnoughException e) {
                 throw new RuntimeException("unreachable", e);
