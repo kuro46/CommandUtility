@@ -1,4 +1,4 @@
-package xyz.shirokuro.commandutility.util;
+package xyz.shirokuro.commandutility;
 
 import java.util.List;
 import java.util.Objects;
