@@ -8,7 +8,7 @@ import java.util.Map;
 
 public interface CommandHandler extends CommandCompleter {
 
-    void execute(ExecutionData data);
+    void execute(ExecutionData data) throws CommandExecutionException;
 
     @Override
     default List<String> complete(CompletionData data) {

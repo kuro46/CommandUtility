@@ -34,10 +34,36 @@ public final class ExecutionData {
      *
      * @return {@code Player} or {@code null}
      */
-    public Player getSenderAsPlayer() {
+    public Player tryGetPlayer() {
         return sender instanceof Player
             ? (Player) sender
             : null;
+    }
+
+    /**
+     * Returns {@code CommandSender} as a {@code Player} if possible.
+     * Otherwise throw {@code CommandExecutionException} with specified message.
+     *
+     * @param message if {@code CommandSender} is not a instance of {@code Player}
+     * @return {@code Player}
+     */
+    public Player getPlayer(final String message) throws CommandExecutionException {
+        final Player player = tryGetPlayer();
+        if (player == null) {
+            throw new CommandExecutionException(message);
+        }
+        return player;
+    }
+
+    /**
+     * Returns {@code CommandSender} as a {@code Player} if possible.
+     * Otherwise throw {@code CommandExecutionException} with default message.<br>
+     * Default message is <pre>Please perform this command from the console</pre>
+     *
+     * @return {@code Player}
+     */
+    public Player getPlayer() throws CommandExecutionException {
+        return getPlayer("Please perform this command from the console");
     }
 
     public CommandNode getCommand() {

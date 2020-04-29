@@ -18,18 +18,21 @@ final class ReflectedCommandHandler implements CommandHandler {
         this.completer = completer;
     }
 
-    private Object invokeSilently(final Object caller, final Method method, final Object... args) {
+    private Object invokeSilently(final Object caller, final Method method, final Object... args) throws CommandExecutionException {
         try {
             return method.invoke(caller, args);
         } catch (final IllegalAccessException e) {
             throw new RuntimeException("Cannot access to method: " + ReflectionUtils.methodInfo(method), e);
         } catch (final InvocationTargetException e) {
+            if (e.getCause() instanceof CommandExecutionException) {
+                throw (CommandExecutionException) e.getCause();
+            }
             throw new RuntimeException("Exception occurred in wrapped method" + ReflectionUtils.methodInfo(method), e.getCause());
         }
     }
 
     @Override
-    public void execute(final ExecutionData data) {
+    public void execute(final ExecutionData data) throws CommandExecutionException{
         invokeSilently(caller, executor, data);
     }
 
@@ -37,7 +40,11 @@ final class ReflectedCommandHandler implements CommandHandler {
     @Override
     public List<String> complete(final CompletionData data) {
         if (completer != null) {
-            return (List<String>) invokeSilently(caller, completer, data);
+            try {
+                return (List<String>) invokeSilently(caller, completer, data);
+            } catch (final CommandExecutionException e) {
+                throw new RuntimeException("You cannot throw CommandExecutionException from completer", e);
+            }
         } else {
             return Collections.emptyList();
         }

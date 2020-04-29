@@ -181,7 +181,14 @@ public final class CommandGroup implements TabExecutor {
             sender.sendMessage(errorPrefix + "Usage: /" + joiner.toString());
             return true;
         }
-        commandNode.getHandler().execute(new ExecutionData(this, sender, commandNode, parsedArgs));
+        try {
+            commandNode.getHandler().execute(new ExecutionData(this, sender, commandNode, parsedArgs));
+        } catch (final CommandExecutionException e) {
+            final String message = e.getMessage();
+            if (message != null) {
+                sender.sendMessage(errorPrefix + message);
+            }
+        }
         return true;
     }
 
