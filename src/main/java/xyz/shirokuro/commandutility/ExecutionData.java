@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -92,5 +93,9 @@ public final class ExecutionData {
 
     public String getOrNull(final String argumentName) {
         return get(argumentName).orElse(null);
+    }
+
+    public String getOrFail(final String argumentName) {
+        return get(argumentName).orElseThrow(() -> new NoSuchElementException("No value named " + argumentName + "exist"));
     }
 }
