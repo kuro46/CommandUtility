@@ -1,6 +1,7 @@
 package xyz.shirokuro.commandutility;
 
 import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -15,12 +16,12 @@ public final class CommandUtils {
     }
 
     /**
-     * Convert {@code source} to {@code List&lt;Strnig&gt;} with {@code mappingFunc} and
+     * Convert {@code source} to {@code Collection&lt;Strnig&gt;} with {@code mappingFunc} and
      * filter with {@code data.getCurrentValue}.
      */
     public static <T> List<String> convertToCandidates(
             final CompletionData data,
-            final List<T> source,
+            final Collection<T> source,
             final Function<T, String> mappingFunc) {
         Objects.requireNonNull(data, "data");
         Objects.requireNonNull(source, "source");
