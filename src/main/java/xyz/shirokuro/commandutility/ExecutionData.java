@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class ExecutionData {
 
@@ -85,7 +86,11 @@ public final class ExecutionData {
      * @param argumentName name of argument
      * @return value
      */
-    public String get(final String argumentName) {
-        return args.get(Objects.requireNonNull(argumentName));
+    public Optional<String> get(final String argumentName) {
+        return Optional.ofNullable(args.get(Objects.requireNonNull(argumentName)));
+    }
+
+    public String getOrNull(final String argumentName) {
+        return get(argumentName).orElse(null);
     }
 }
