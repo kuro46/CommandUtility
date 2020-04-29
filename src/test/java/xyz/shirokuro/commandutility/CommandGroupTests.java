@@ -33,32 +33,32 @@ public class CommandGroupTests {
 
     public static final class AnnotationExecutorAndCompleter {
 
-        @Executor(command = "foo bar", description = "TODO")
+        @Executor("foo bar")
         public void execute(ExecutionData data) {
         }
 
-        @Completer(command = "foo bar")
+        @Completer("foo bar")
         public void complete(CompletionData data) {
         }
     }
 
     public static final class AnnotationExecutorOnly {
 
-        @Executor(command = "foo bar", description = "TODO")
+        @Executor("foo bar")
         public void execute(ExecutionData data) {
         }
     }
 
     public static final class AnnotationCompleterOnly {
 
-        @Completer(command = "foo bar")
+        @Completer("foo bar")
         public void complete(CompletionData data) {
         }
     }
 
     public static final class AnnotationIncorrectParameters {
 
-        @Executor(command = "foo bar", description = "TODO")
+        @Executor("foo bar")
         public void execute() {
         }
     }

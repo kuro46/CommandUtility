@@ -62,26 +62,26 @@ public final class BranchNodeTests {
     }
 
     private static final class NoOpHandler {
-        @Executor(command = "b a a", description = "")
+        @Executor("b a a")
         public void executeHPF(ExecutionData data) {
         }
 
-        @Executor(command = "b a b", description = "")
+        @Executor("b a b")
         public void executeHPB(ExecutionData data) {
 
         }
 
-        @Executor(command = "b b a", description = "")
+        @Executor("b b a")
         public void executeHFF(ExecutionData data) {
 
         }
 
-        @Executor(command = "b b b", description = "")
+        @Executor("b b b")
         public void executeHFB(ExecutionData data) {
 
         }
 
-        @Executor(command = "a", description = "")
+        @Executor("a")
         public void executeP(ExecutionData data) {
 
         }
