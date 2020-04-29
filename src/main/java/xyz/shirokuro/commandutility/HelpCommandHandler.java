@@ -47,7 +47,9 @@ public final class HelpCommandHandler implements CommandHandler {
                 })
                 .forEach(sj::add);
             sender.sendMessage(sj.toString());
-            sender.sendMessage("  - " + command.getDescription());
+            command.getDescription().ifPresent(description -> {
+                sender.sendMessage("  - " + description);
+            });
         }
         if (footer != null) {
             sender.sendMessage(footer);

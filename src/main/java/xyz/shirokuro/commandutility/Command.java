@@ -32,7 +32,6 @@ public final class Command {
 
     public static Command fromString(final CommandHandler handler, final String command, final String description) {
         Objects.requireNonNull(command, "command");
-        Objects.requireNonNull(description, "description");
         Objects.requireNonNull(handler, "handler");
         if (command.trim().isEmpty()) {
             throw new IllegalArgumentException("command is empty!");
@@ -91,8 +90,8 @@ public final class Command {
         return ImmutableMap.copyOf(result);
     }
 
-    public String getDescription() {
-        return description;
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(description);
     }
 
     public List<String> getSections() {
