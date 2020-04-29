@@ -10,6 +10,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.ChatColor;
 import xyz.shirokuro.commandutility.annotation.Completer;
+import xyz.shirokuro.commandutility.annotation.Description;
 import xyz.shirokuro.commandutility.annotation.Executor;
 
 import java.lang.reflect.*;
@@ -111,9 +112,12 @@ public final class CommandGroup implements TabExecutor {
                             " is annotated @Executor, but method parameters are incorrect!");
                 }
                 final ReflectedHandlerInfo info =
-                    handlerInfoMap.computeIfAbsent(executorAnnotation.command(), s -> new ReflectedHandlerInfo());
+                    handlerInfoMap.computeIfAbsent(executorAnnotation.value(), s -> new ReflectedHandlerInfo());
                 info.executor = method;
-                info.description = executorAnnotation.description();
+                final Description description = method.getAnnotation(Description.class);
+                if (description != null) {
+                    info.description = description.value();
+                }
             } else if (completerAnnotation != null) {
                 ReflectionUtils.assertPublic(method);
                 if (!ReflectionUtils.equalsMethodParams(method, CompletionData.class)) {
@@ -122,7 +126,7 @@ public final class CommandGroup implements TabExecutor {
                             " is annotated @Completer, but method parameters are incorrect!");
                 }
                 final ReflectedHandlerInfo info =
-                    handlerInfoMap.computeIfAbsent(completerAnnotation.command(), s -> new ReflectedHandlerInfo());
+                    handlerInfoMap.computeIfAbsent(completerAnnotation.value(), s -> new ReflectedHandlerInfo());
                 info.completer = method;
             }
         }
