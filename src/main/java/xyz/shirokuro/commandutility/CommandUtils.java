@@ -36,121 +36,98 @@ public final class CommandUtils {
 
     /**
      * Asserts {@code target} has {@code permission}.
-     * If hasn't, throw {@code CommandExecutionException} with specified message.
+     * If it hasn't, throws {@code CommandExecutionException}
+     * with specified message (or default message if message is {@code null}).
+     *
+     * @param target target to assert
+     * @param permission required permission
+     * @param message message for {@code CommandExecutionException}. {@code null} for default
      */
     public static void assertPermission(
             final CommandSender target,
             final String permission,
-            final String message) throws CommandExecutionException {
+            String message) throws CommandExecutionException {
         Objects.requireNonNull(target, "target");
-        Objects.requireNonNull(message, "message");
         Objects.requireNonNull(permission, "permission");
+        message = message == null
+            ? "You don't have permission."
+            : message;
         if (!target.hasPermission(permission)) {
             throw new CommandExecutionException(message);
         }
     }
 
     /**
-     * {@code assertPermission} with default message.
-     * @see assertPermission
-     */
-    public static void assertPermission(
-            final CommandSender target,
-            final String permission) throws CommandExecutionException {
-        assertPermission(target, permission, "You don't have permission.");
-    }
-
-    /**
-     * {@code toInt} with default message.
-     * @see toInt
-     */
-    public static int toInt(final String data) throws CommandExecutionException {
-        return toInt(data, "'<data>' is a invalid number");
-    }
-
-    /**
-     * Converts {@code data} to int. If failure, throw {@code CommandExecutionException} with specified message.
+     * Converts {@code source} to {@code int}.
+     * If failure, throws {@code CommandExecutionException} with specified message (or default if {@code null}).
      *
-     * @param message exception message. {@code &lt;data&gt;} will be replaced to {@code data}.
+     * @param source conversion source
+     * @param messageFunc {@code Function} for generate message via {@code source}
+     * @return integer
      */
-    public static int toInt(final String data, final String message) throws CommandExecutionException {
-        Objects.requireNonNull(data, "data");
-        Objects.requireNonNull(message, "message");
+    public static int toInt(final String source, Function<String, String> messageFunc) throws CommandExecutionException {
+        Objects.requireNonNull(source, "source");
+        messageFunc = messageFunc == null
+            ? s -> "'" + s + "' is a invalid number"
+            : messageFunc;
         try {
-            return Integer.parseInt(data);
+            return Integer.parseInt(source);
         } catch (final NumberFormatException ignored) {
-            throw new CommandExecutionException(message.replace("<data>", data));
+            throw new CommandExecutionException(messageFunc.apply(source));
         }
     }
 
     /**
-     * {@code toDouble} with default message.
-     * @see toDouble
-     */
-    public static double toDouble(final String data) throws CommandExecutionException {
-        return toDouble(data, "'<data>' is a invalid number");
-    }
-
-    /**
-     * Converts {@code data} to double. If failure, throw {@code CommandExecutionException} with specified message.
+     * Converts {@code source} to {@code double}.
+     * If failure, throws {@code CommandExecutionException} with specified message (or default if {@code null}).
      *
-     * @param message exception message. {@code &lt;data&gt;} will be replaced to {@code data}.
+     * @param source conversion source
+     * @param messageFunc {@code Function} for generate message via {@code source}
+     * @return double
      */
-    public static double toDouble(final String data, final String message) throws CommandExecutionException {
-        Objects.requireNonNull(data, "data");
-        Objects.requireNonNull(message, "message");
+    public static double toDouble(final String source, Function<String, String> messageFunc) throws CommandExecutionException {
+        Objects.requireNonNull(source, "source");
+        messageFunc = messageFunc == null
+            ? s -> "'" + s + "' is a invalid number"
+            : messageFunc;
         try {
-            return Double.parseDouble(data);
+            return Double.parseDouble(source);
         } catch (final NumberFormatException ignored) {
-            throw new CommandExecutionException(message.replace("<data>", data));
+            throw new CommandExecutionException(messageFunc.apply(source));
         }
     }
 
-    /**
-     * Converts {@code data} to {@code Player}. If failure, throw {@code CommandExecutionException} with specified message.
-     *
-     * @param message exception message. {@code &lt;data&gt;} will be replaced to {@code data}.
-     */
-    public static Player toPlayer(final String data, final String message) throws CommandExecutionException {
-        Objects.requireNonNull(data, "data");
-        Objects.requireNonNull(message, "message");
+    public static Player toPlayer(final String source, Function<String, String> messageFunc) throws CommandExecutionException {
+        Objects.requireNonNull(source, "source");
+        messageFunc = messageFunc == null
+            ? s -> "Cannot find player '" + s + "'"
+            : messageFunc;
         @SuppressWarnings("deprecation")
-        final Player player = Bukkit.getPlayer(data);
+        final Player player = Bukkit.getPlayer(source);
         if (player == null) {
-            throw new CommandExecutionException(data.replace("<data>", data));
+            throw new CommandExecutionException(messageFunc.apply(source));
         }
         return player;
     }
 
-    /**
-     * {@code toPlayer} with default message.
-     * @see toPlayer
-     */
-    public static Player toPlayer(final String data) throws CommandExecutionException {
-        return toPlayer(data, "Cannot find player '<data>'");
-    }
-
-    /**
-     * Converts {@code data} to {@code World}. If failure, throw {@code CommandExecutionException} with specified message.
-     *
-     * @param message exception message. {@code &lt;data&gt;} will be replaced to {@code data}.
-     */
-    public static World toWorld(final String data, final String message) throws CommandExecutionException {
-        Objects.requireNonNull(data, "data");
-        Objects.requireNonNull(message, "message");
-        final World world = Bukkit.getWorld(data);
+    public static World toWorld(final String source, Function<String, String> messageFunc) throws CommandExecutionException {
+        Objects.requireNonNull(source, "source");
+        messageFunc = messageFunc == null
+            ? s -> "Cannot find world '" + s +"'"
+            : messageFunc;
+        final World world = Bukkit.getWorld(source);
         if (world == null) {
-            throw new CommandExecutionException(data.replace("<data>", data));
+            throw new CommandExecutionException(messageFunc.apply(source));
         }
         return world;
     }
 
-    /**
-     * {@code toWorld} with default message.
-     * @see toWorld
-     */
-    public static World toWorld(final String data) throws CommandExecutionException {
-        return toWorld(data, "Cannot find world '<data>'");
+    public static <T> T requireNonNull(final T original, final String message) throws CommandExecutionException {
+        Objects.requireNonNull(message, "message");
+        if (original == null) {
+            throw new CommandExecutionException(message);
+        }
+        return original;
     }
 
     /**
