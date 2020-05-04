@@ -1,9 +1,10 @@
 package xyz.shirokuro.commandutility;
 
+import java.util.Locale;
 import java.util.List;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -150,5 +151,31 @@ public final class CommandUtils {
      */
     public static World toWorld(final String data) throws CommandExecutionException {
         return toWorld(data, "Cannot find world '<data>'");
+    }
+
+    /**
+     * Convert supplied string to {@code Enum}.
+     *
+     * @param clazz {@code Class} instance of Enum type
+     * @param source string to convert
+     * @param messageFunc for generate message from source string. {@code null} for default message.
+     * @throws CommandExecutionException if failed to convert source to {@code Enum}
+     * @return converted enum. this mustn't be null.
+     */
+    public static <E extends Enum<E>> E toEnum(
+        final Class<E> clazz,
+        final String source,
+        Function<String, String> messageFunc) throws CommandExecutionException {
+
+        Objects.requireNonNull(clazz, "clazz");
+        Objects.requireNonNull(source, "source");
+        messageFunc = messageFunc == null
+            ? s -> "No enum constant named '" + s + "' exists"
+            : messageFunc;
+        try {
+            return Enum.valueOf(clazz, source.toUpperCase(Locale.ENGLISH));
+        } catch (final IllegalArgumentException ignored) {
+            throw new CommandExecutionException(messageFunc.apply(source));
+        }
     }
 }
