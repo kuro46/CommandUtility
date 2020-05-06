@@ -1,4 +1,4 @@
-package xyz.shirokuro.commandutility;
+package dev.shirokuro.commandutility;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;

@@ -5,7 +5,7 @@ plugins {
     id 'java'
 }
 
-group = 'xyz.shirokuro'
+group = 'dev.shirokuro'
 version = '0.8.0-SNAPSHOT'
 
 repositories {

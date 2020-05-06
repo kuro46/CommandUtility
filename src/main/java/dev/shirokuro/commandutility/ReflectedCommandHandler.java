@@ -1,4 +1,4 @@
-package xyz.shirokuro.commandutility;
+package dev.shirokuro.commandutility;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -1,4 +1,4 @@
-package xyz.shirokuro.commandutility;
+package dev.shirokuro.commandutility;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
@@ -9,9 +9,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.ChatColor;
-import xyz.shirokuro.commandutility.annotation.Completer;
-import xyz.shirokuro.commandutility.annotation.Description;
-import xyz.shirokuro.commandutility.annotation.Executor;
+import dev.shirokuro.commandutility.annotation.Completer;
+import dev.shirokuro.commandutility.annotation.Description;
+import dev.shirokuro.commandutility.annotation.Executor;
 
 import java.lang.reflect.*;
 import java.util.*;

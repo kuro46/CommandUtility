@@ -1,6 +1,6 @@
-package xyz.shirokuro.commandutility;
+package dev.shirokuro.commandutility;
 
-import xyz.shirokuro.commandutility.annotation.Executor;
+import dev.shirokuro.commandutility.annotation.Executor;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import org.bukkit.command.CommandSender;

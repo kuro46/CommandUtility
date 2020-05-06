@@ -1,4 +1,4 @@
-package xyz.shirokuro.commandutility;
+package dev.shirokuro.commandutility;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;

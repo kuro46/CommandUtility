@@ -1,4 +1,4 @@
-package xyz.shirokuro.commandutility;
+package dev.shirokuro.commandutility;
 
 import com.google.common.base.Splitter;
 import java.util.ArrayList;

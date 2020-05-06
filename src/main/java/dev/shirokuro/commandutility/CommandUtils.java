@@ -1,4 +1,4 @@
-package xyz.shirokuro.commandutility;
+package dev.shirokuro.commandutility;
 
 import java.util.Locale;
 import java.util.List;
@@ -10,8 +10,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import xyz.shirokuro.commandutility.CommandExecutionException;
-import xyz.shirokuro.commandutility.CompletionData;
+import dev.shirokuro.commandutility.CommandExecutionException;
+import dev.shirokuro.commandutility.CompletionData;
 
 public final class CommandUtils {
     private CommandUtils() {

@@ -1,8 +1,8 @@
-package xyz.shirokuro.commandutility;
+package dev.shirokuro.commandutility;
 
 import org.junit.jupiter.api.Test;
-import xyz.shirokuro.commandutility.annotation.Completer;
-import xyz.shirokuro.commandutility.annotation.Executor;
+import dev.shirokuro.commandutility.annotation.Completer;
+import dev.shirokuro.commandutility.annotation.Executor;
 
 import java.util.Arrays;
 import java.util.Collections;
