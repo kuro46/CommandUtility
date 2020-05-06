@@ -63,7 +63,8 @@ public class FooPlugin extends JavaPlugin {
             .addAll(this);
     }
 
-    @Executor(command = "foo info <player:players>", description = "Displays location of specified player.")
+    @Executor("foo info <player:players>")
+    @Description("Displays location of specified player.")
     public void info(ExecutionData data) throws CommandExecutionException {
         CommandSender sender = data.getSender();
         Player target = CommandUtils.toPlayer(data.get("player"), name -> {
