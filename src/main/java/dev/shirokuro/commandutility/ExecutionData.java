@@ -60,12 +60,12 @@ public final class ExecutionData {
     /**
      * Returns {@code CommandSender} as a {@code Player} if possible.
      * Otherwise throw {@code CommandExecutionException} with default message.<br>
-     * Default message is <pre>Please perform this command from the console</pre>
+     * Default message is <pre>You cannot perform this command from the console</pre>
      *
      * @return {@code Player}
      */
     public Player getPlayer() throws CommandExecutionException {
-        return getPlayer("Please perform this command from the console");
+        return getPlayer("You cannot perform this command from the console");
     }
 
     public CommandNode getCommand() {
