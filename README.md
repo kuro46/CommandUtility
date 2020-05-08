@@ -56,7 +56,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class FooPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
-        new CommandGroup("[foo] "/*エラー時(コマンドが見つからなかった場合、引数のパースに失敗した場合)のプレフィックス*/)
+        CommandGroup.initBukkit()
             // ヘルプメッセージを自動生成する
             .add("foo help", new HelpCommandHandler())
             // @Executorもしくは@Completerアノテーションが付いたメソッドをすべて追加する
@@ -95,7 +95,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class FooPlugin extends JavaPlugin implements CommandHandler {
     @Override
     public void onEnable() {
-        new CommandGroup("[foo] "/*エラー時(コマンドが見つからなかった場合、引数のパースに失敗した場合)のプレフィックス*/)
+        CommandGroup.initBukkit()
             .add("foo help", new HelpCommandHandler())
             .add(this, "foo info <player:players>", "Displays location of specified player.");
     }
@@ -106,7 +106,6 @@ public class FooPlugin extends JavaPlugin implements CommandHandler {
         if (data.getCommand().sections().equals("foo info")) {
             // toPlayerは、渡されたプレイヤー名のプレイヤーが存在すればPlayerインスタンスを返し、
             // 見つからなかった場合はCommandExecutionExceptionを投げる。
-            // 尚、投げられたCommandExecutionExceptionはCommandGroup.errorPrefixとともにプレイヤーに送信される
             Player target = CommandUtils.toPlayer(data.get("player"), name -> {
                 return "Cannot find player named " + name;
             });
