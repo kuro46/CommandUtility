@@ -30,8 +30,25 @@ if (!JavaVersion.current().isJava9Compatible()) {
     }
 }
 
-dependencyLocking {
-    lockAllConfigurations()
+configurations {
+    compileClasspath {
+        resolutionStrategy.activateDependencyLocking()
+    }
+    annotationProcessor {
+        resolutionStrategy.activateDependencyLocking()
+    }
+    runtimeClasspath {
+        resolutionStrategy.activateDependencyLocking()
+    }
+    testCompileClasspath {
+        resolutionStrategy.activateDependencyLocking()
+    }
+    testAnnotationProcessor {
+        resolutionStrategy.activateDependencyLocking()
+    }
+    testRuntimeClasspath {
+        resolutionStrategy.activateDependencyLocking()
+    }
 }
 
 java {
