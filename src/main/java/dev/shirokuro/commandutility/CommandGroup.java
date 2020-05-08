@@ -12,21 +12,25 @@ public final class CommandGroup implements PlatformCommandHandler {
 
     private final Map<String, CommandCompleter> completerMap = new HashMap<>();
     private final BranchNode root = new BranchNode("root");
+    private final ErrorHandler errorHandler;
     private final Platform platform;
-    private final String errorPrefix;
 
-    public CommandGroup(final Platform platform, final String errorPrefix) {
-        this.errorPrefix = Objects.requireNonNull(errorPrefix, "errorPrefix");
+    public CommandGroup(final Platform platform, final ErrorHandler errorHandler) {
+        this.errorHandler = Objects.requireNonNull(errorHandler, "errorHandler");
         this.platform = Objects.requireNonNull(platform, "platform");
         addDefaultCompleters();
     }
 
     public CommandGroup(final Platform platform) {
-        this(platform, "");
+        this(platform, ErrorHandler.defaultHandler());
     }
 
-    public static CommandGroup initBukkit(final String errorPrefix) {
-        return new CommandGroup(new BukkitPlatform(), errorPrefix);
+    public static CommandGroup initBukkit(final ErrorHandler errorHandler) {
+        return new CommandGroup(new BukkitPlatform(), errorHandler);
+    }
+
+    public static CommandGroup initBukkit() {
+        return new CommandGroup(new BukkitPlatform());
     }
 
     public BranchNode getRoot() {
@@ -136,8 +140,7 @@ public final class CommandGroup implements PlatformCommandHandler {
     public void execute(final CommandSender sender, final List<String> commandLine) {
         final BranchNode.WalkResult findResult = root.walk(commandLine);
         if (!findResult.getCommand().isPresent()) {
-            sender.sendMessage(errorPrefix + "Candidates: " +
-                    String.join(", ", Iterables.getLast(findResult.getBranches()).getChildren().keySet()));
+            errorHandler.onPreferredCommandNotFound(this, sender, Iterables.getLast(findResult.getBranches()));
             return;
         }
         final CommandNode commandNode = findResult.getCommand().get();
@@ -146,22 +149,13 @@ public final class CommandGroup implements PlatformCommandHandler {
         try {
             parsedArgs = command.parseArgs(findResult.getUnreachablePaths(), false);
         } catch (Command.ArgumentNotEnoughException e) {
-            final String requiredStr = command.getArgs().stream()
-                    .map(info -> info.toString(false))
-                    .collect(Collectors.joining(" "));
-            final StringJoiner joiner = new StringJoiner(" ");
-            command.getSections().forEach(joiner::add);
-            joiner.add(requiredStr);
-            sender.sendMessage(errorPrefix + "Usage: /" + joiner.toString());
+            errorHandler.onInvalidArgs(this, sender, command);
             return;
         }
         try {
             command.getHandler().execute(new ExecutionData(this, sender, commandNode, parsedArgs));
         } catch (final CommandExecutionException e) {
-            final String message = e.getMessage();
-            if (message != null) {
-                sender.sendMessage(errorPrefix + message);
-            }
+            errorHandler.onExecutionFailed(this, sender, e);
         }
     }
 
