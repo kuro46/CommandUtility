@@ -47,7 +47,7 @@ public final class BranchNodeTests {
 
     @Test
     public void walkNodeTreeTest() {
-        final CommandGroup group = new CommandGroup().addAll(new NoOpHandler());
+        final CommandGroup group = new CommandGroup(new TestPlatform()).addAll(new NoOpHandler());
         final List<CommandNode> nodes = group.getRoot().walkNodeTree();
         final String expect = "a\n" +
             "b a a\n" +

@@ -9,27 +9,32 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.ChatColor;
-import dev.shirokuro.commandutility.annotation.Completer;
-import dev.shirokuro.commandutility.annotation.Description;
-import dev.shirokuro.commandutility.annotation.Executor;
+import dev.shirokuro.commandutility.annotation.*;
+import dev.shirokuro.commandutility.platform.*;
 
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public final class CommandGroup implements TabExecutor {
+public final class CommandGroup implements PlatformCommandHandler {
 
     private final Map<String, CommandCompleter> completerMap = new HashMap<>();
     private final BranchNode root = new BranchNode("root");
+    private final Platform platform;
     private final String errorPrefix;
 
-    public CommandGroup(final String errorPrefix) {
-        this.errorPrefix = Objects.requireNonNull(errorPrefix);
+    public CommandGroup(final Platform platform, final String errorPrefix) {
+        this.errorPrefix = Objects.requireNonNull(errorPrefix, "errorPrefix");
+        this.platform = Objects.requireNonNull(platform, "platform");
         addDefaultCompleters();
     }
 
-    public CommandGroup() {
-        this("");
+    public CommandGroup(final Platform platform) {
+        this(platform, "");
+    }
+
+    public static CommandGroup initBukkit(final String errorPrefix) {
+        return new CommandGroup(new BukkitPlatform(), errorPrefix);
     }
 
     public BranchNode getRoot() {
@@ -37,18 +42,7 @@ public final class CommandGroup implements TabExecutor {
     }
 
     private void addDefaultCompleters() {
-        addCompleter("worlds", data -> {
-            return Bukkit.getWorlds().stream()
-                .map(World::getName)
-                .filter(s -> s.startsWith(data.getCurrentValue()))
-                .collect(Collectors.toList());
-        });
-        addCompleter("players", data -> {
-            return Bukkit.getOnlinePlayers().stream()
-                .map(Player::getName)
-                .filter(s -> s.startsWith(data.getCurrentValue()))
-                .collect(Collectors.toList());
-        });
+        completerMap.putAll(platform.defaultCompleters());
     }
 
     public CommandGroup addCompleter(final String argumentName, final CommandCompleter completer) {
@@ -75,15 +69,12 @@ public final class CommandGroup implements TabExecutor {
         }
         // First time process
         if (firstTime) {
-            // null-check for unit testing
-            // Register to Bukkit API
-            if (Bukkit.getServer() != null) {
-                final PluginCommand pluginCommand = Bukkit.getPluginCommand(firstSection);
-                if (pluginCommand == null) {
-                    throw new IllegalArgumentException("Command: " + firstSection +
-                            " is not registered by any plugins");
-                }
-                pluginCommand.setExecutor(this);
+            // Register handler to platform
+            try {
+                platform.registerHandler(firstSection, this);
+            } catch (final CommandNotExistsException e) {
+                throw new IllegalArgumentException("Command: " + firstSection +
+                    " is not registered by any plugins", e);
             }
         }
         return this;
@@ -150,15 +141,12 @@ public final class CommandGroup implements TabExecutor {
     }
 
     @Override
-    public boolean onCommand(final CommandSender sender, final org.bukkit.command.Command bukkitCommand, final String label, final String[] args) {
-        final List<String> normalized = new ArrayList<>();
-        normalized.add(bukkitCommand.getName());
-        normalized.addAll(Arrays.asList(args));
-        final BranchNode.WalkResult findResult = root.walk(normalized);
+    public void execute(final CommandSender sender, final List<String> commandLine) {
+        final BranchNode.WalkResult findResult = root.walk(commandLine);
         if (!findResult.getCommand().isPresent()) {
             sender.sendMessage(errorPrefix + "Candidates: " +
                     String.join(", ", Iterables.getLast(findResult.getBranches()).getChildren().keySet()));
-            return true;
+            return;
         }
         final CommandNode commandNode = findResult.getCommand().get();
         final Command command = commandNode.getCommand();
@@ -173,7 +161,7 @@ public final class CommandGroup implements TabExecutor {
             command.getSections().forEach(joiner::add);
             joiner.add(requiredStr);
             sender.sendMessage(errorPrefix + "Usage: /" + joiner.toString());
-            return true;
+            return;
         }
         try {
             command.getHandler().execute(new ExecutionData(this, sender, commandNode, parsedArgs));
@@ -183,23 +171,14 @@ public final class CommandGroup implements TabExecutor {
                 sender.sendMessage(errorPrefix + message);
             }
         }
-        return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, org.bukkit.command.Command bukkitCommand, String alias, String[] args) {
-        final List<String> normalized = new ArrayList<>();
-        normalized.add(bukkitCommand.getName());
-        for (String arg : args) {
-            if (!arg.isEmpty()) {
-                normalized.add(arg);
-            }
-        }
-        if (args.length >= 1 && args[args.length - 1].isEmpty()) {
-            normalized.add("");
-        }
-        final String completing = normalized.get(normalized.size() - 1);
-        final BranchNode.WalkResult findResult = root.walk(normalized.subList(0, normalized.size() - 1) /* Remove completing argument*/);
+    public List<String> complete(final CommandSender sender, final CompletingPosition pos, final List<String> commandLine) {
+        final String completing = pos == CompletingPosition.LAST
+            ? Iterables.getLast(commandLine)
+            : "";
+        final BranchNode.WalkResult findResult = root.walk(commandLine);
         if (!findResult.getCommand().isPresent()) {
             return Iterables.getLast(findResult.getBranches()).getChildren().keySet().stream()
                 .filter(s -> s.startsWith(completing))

@@ -110,7 +110,7 @@ public class CommandNodeTests {
     }
 
     private CommandNode createCommand(final String command, final String description) {
-        final CommandGroup group = new CommandGroup()
+        final CommandGroup group = new CommandGroup(new TestPlatform())
             .add(NOOP_HANDLER, command, description);
         return group.getRoot().walk(Splitter.on(' ').splitToList(command)).getCommand().get();
     }

@@ -13,22 +13,22 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CommandGroupTests {
     @Test
     public void addAllTestExecutorAndCompleter() {
-        assertDoesNotThrow(() -> new CommandGroup().addAll(new AnnotationExecutorAndCompleter()));
+        assertDoesNotThrow(() -> new CommandGroup(new TestPlatform()).addAll(new AnnotationExecutorAndCompleter()));
     }
 
     @Test
     public void addAllTestExecutorOnly() {
-        assertDoesNotThrow(() -> new CommandGroup().addAll(new AnnotationExecutorOnly()));
+        assertDoesNotThrow(() -> new CommandGroup(new TestPlatform()).addAll(new AnnotationExecutorOnly()));
     }
 
     @Test
     public void addAllTestCompleterOnly() {
-        assertThrows(IllegalArgumentException.class, () -> new CommandGroup().addAll(new AnnotationCompleterOnly()));
+        assertThrows(IllegalArgumentException.class, () -> new CommandGroup(new TestPlatform()).addAll(new AnnotationCompleterOnly()));
     }
 
     @Test
     public void addAllTestIncorrectParameters() {
-        assertThrows(IllegalArgumentException.class, () -> new CommandGroup().addAll(new AnnotationIncorrectParameters()));
+        assertThrows(IllegalArgumentException.class, () -> new CommandGroup(new TestPlatform()).addAll(new AnnotationIncorrectParameters()));
     }
 
     public static final class AnnotationExecutorAndCompleter {
