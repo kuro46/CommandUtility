@@ -5,6 +5,9 @@
 CommandUtilityは、Bukkitでのコマンド処理を改善するために開発されたライブラリです。  
 独自のコマンドハンドラを使用することで、コマンドの実行処理や、Tab補完機能が簡単に実装できるようになります。
 
+- [Javadoc](https://shirokuro.dev/javadoc/commandutility/latest/)
+- [リポジトリ](https://maven.shirokuro.dev/repos/releases/)
+
 ## 導入方法
 
 ### Maven
