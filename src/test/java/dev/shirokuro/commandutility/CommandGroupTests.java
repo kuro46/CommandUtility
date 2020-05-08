@@ -1,13 +1,8 @@
 package dev.shirokuro.commandutility;
 
-import com.google.common.collect.Iterables;
-import org.junit.jupiter.api.Test;
 import dev.shirokuro.commandutility.annotation.Completer;
 import dev.shirokuro.commandutility.annotation.Executor;
-
-import java.util.Arrays;
-import java.util.Collections;
-
+import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CommandGroupTests {

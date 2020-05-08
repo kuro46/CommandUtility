@@ -3,7 +3,6 @@ package dev.shirokuro.commandutility;
 import be.seeseemelk.mockbukkit.MockBukkit;
 import java.io.File;
 import java.io.StringReader;
-import java.util.HashMap;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;

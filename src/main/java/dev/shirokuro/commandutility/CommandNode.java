@@ -1,7 +1,5 @@
 package dev.shirokuro.commandutility;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -38,8 +36,12 @@ public final class CommandNode implements Node {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         CommandNode commandNode = (CommandNode) o;
         return Objects.equals(parent, commandNode.parent) &&
             Objects.equals(name, commandNode.name) &&

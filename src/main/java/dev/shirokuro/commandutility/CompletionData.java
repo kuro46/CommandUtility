@@ -1,8 +1,7 @@
 package dev.shirokuro.commandutility;
 
-import org.bukkit.command.CommandSender;
-
 import java.util.Objects;
+import org.bukkit.command.CommandSender;
 
 public final class CompletionData {
 

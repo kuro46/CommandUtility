@@ -1,10 +1,7 @@
 package dev.shirokuro.commandutility;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public final class ReflectionUtilsTests {

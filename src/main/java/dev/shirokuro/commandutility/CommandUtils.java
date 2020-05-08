@@ -1,8 +1,8 @@
 package dev.shirokuro.commandutility;
 
-import java.util.Locale;
-import java.util.List;
 import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -10,8 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import dev.shirokuro.commandutility.CommandExecutionException;
-import dev.shirokuro.commandutility.CompletionData;
 
 public final class CommandUtils {
     private CommandUtils() {
@@ -140,10 +138,9 @@ public final class CommandUtils {
      * @return converted enum. this mustn't be null.
      */
     public static <E extends Enum<E>> E toEnum(
-        final Class<E> clazz,
-        final String source,
-        Function<String, String> messageFunc) throws CommandExecutionException {
-
+            final Class<E> clazz,
+            final String source,
+            Function<String, String> messageFunc) throws CommandExecutionException {
         Objects.requireNonNull(clazz, "clazz");
         Objects.requireNonNull(source, "source");
         messageFunc = messageFunc == null

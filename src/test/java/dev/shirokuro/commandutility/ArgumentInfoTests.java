@@ -1,12 +1,6 @@
 package dev.shirokuro.commandutility;
 
 import org.junit.jupiter.api.Test;
-import dev.shirokuro.commandutility.annotation.Completer;
-import dev.shirokuro.commandutility.annotation.Executor;
-
-import java.util.Arrays;
-import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public final class ArgumentInfoTests {

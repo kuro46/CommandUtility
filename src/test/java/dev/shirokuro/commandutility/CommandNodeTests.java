@@ -1,16 +1,13 @@
 package dev.shirokuro.commandutility;
 
 import com.google.common.base.Splitter;
-import org.bukkit.command.CommandSender;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CommandNodeTests {
@@ -24,12 +21,12 @@ public class CommandNodeTests {
         final CommandNode cmd1 = createCommand("foo bar buz <hoge> [piyo]", "");
         final List<ArgumentInfo> infoList = Arrays.asList(ArgumentInfo.fromString("<hoge>").get(), ArgumentInfo.fromString("[piyo]").get());
         final CommandNode cmd2 = new CommandNode(new BranchNode("root").branch("foo").branch("bar"),
-            "buz",
-            new Command(
-                Arrays.asList("foo", "bar", "buz"),
-                infoList,
-                NOOP_HANDLER,
-                ""));
+                "buz",
+                new Command(
+                    Arrays.asList("foo", "bar", "buz"),
+                    infoList,
+                    NOOP_HANDLER,
+                    ""));
         assertEquals(cmd1, cmd2);
     }
 
@@ -37,11 +34,11 @@ public class CommandNodeTests {
     public void fromStringTestWithSingle() {
         final CommandNode cmd1 = createCommand("foo", "");
         final CommandNode cmd2 = new CommandNode(new BranchNode("root"),
-            "foo",
-            new Command(
-                Arrays.asList("foo"),
-                Collections.emptyList(),
-                NOOP_HANDLER, ""));
+                "foo",
+                new Command(
+                    Arrays.asList("foo"),
+                    Collections.emptyList(),
+                    NOOP_HANDLER, ""));
         assertEquals(cmd1, cmd2);
     }
 
@@ -111,7 +108,7 @@ public class CommandNodeTests {
 
     private CommandNode createCommand(final String command, final String description) {
         final CommandGroup group = new CommandGroup(new TestPlatform())
-            .add(NOOP_HANDLER, command, description);
+                .add(NOOP_HANDLER, command, description);
         return group.getRoot().walk(Splitter.on(' ').splitToList(command)).getCommand().get();
     }
 }

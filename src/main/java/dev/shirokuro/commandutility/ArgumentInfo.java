@@ -1,17 +1,13 @@
 package dev.shirokuro.commandutility;
 
-import com.google.common.base.Splitter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 public final class ArgumentInfo {
     private static final Pattern ARGUMENT_STR_VALIDATOR =
-        Pattern.compile("^[<\\[](.*?)(?::(.*))?[>\\]]$");
+            Pattern.compile("^[<\\[](.*?)(?::(.*))?[>\\]]$");
 
     private final String name;
     private final String completerName;
@@ -59,8 +55,8 @@ public final class ArgumentInfo {
 
     public String toString(final boolean includeCompleterName) {
         final String inner = includeCompleterName
-            ? name + ":" + completerName
-            : name;
+                ? name + ":" + completerName
+                : name;
         if (required) {
             return "<" + inner + ">";
         } else {

@@ -2,19 +2,17 @@ package dev.shirokuro.commandutility;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.Comparator;
 
 public final class BranchNode implements Node {
 
@@ -64,14 +62,14 @@ public final class BranchNode implements Node {
                 break;
             }
             branch.children.values().stream()
-                .sorted(Comparator.comparing(Node::getName))
-                .forEach(node -> {
-                    if (node instanceof BranchNode) {
-                        branches.addLast((BranchNode) node);
-                    } else {
-                        commands.add((CommandNode) node);
-                    }
-                });
+                    .sorted(Comparator.comparing(Node::getName))
+                    .forEach(node -> {
+                        if (node instanceof BranchNode) {
+                            branches.addLast((BranchNode) node);
+                        } else {
+                            commands.add((CommandNode) node);
+                        }
+                    });
         }
         return commands;
     }
@@ -124,8 +122,12 @@ public final class BranchNode implements Node {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         BranchNode branch = (BranchNode) o;
         return Objects.equals(name, branch.name) &&
             Objects.equals(parent, branch.parent);

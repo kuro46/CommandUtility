@@ -1,7 +1,5 @@
 package dev.shirokuro.commandutility;
 
-import java.util.Objects;
-
 public final class CommandExecutionException extends Exception {
 
     public CommandExecutionException() {

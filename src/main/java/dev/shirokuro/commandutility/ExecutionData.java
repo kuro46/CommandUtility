@@ -1,13 +1,12 @@
 package dev.shirokuro.commandutility;
 
 import com.google.common.collect.ImmutableMap;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public final class ExecutionData {
 

@@ -1,10 +1,9 @@
 package dev.shirokuro.commandutility;
 
-import java.util.Collections;
-import java.util.Map;
-import dev.shirokuro.commandutility.CommandCompleter;
 import dev.shirokuro.commandutility.platform.Platform;
 import dev.shirokuro.commandutility.platform.PlatformCommandHandler;
+import java.util.Collections;
+import java.util.Map;
 
 public final class TestPlatform implements Platform {
 

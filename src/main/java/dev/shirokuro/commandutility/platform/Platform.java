@@ -1,7 +1,7 @@
 package dev.shirokuro.commandutility.platform;
 
-import java.util.Map;
 import dev.shirokuro.commandutility.CommandCompleter;
+import java.util.Map;
 
 public interface Platform {
 

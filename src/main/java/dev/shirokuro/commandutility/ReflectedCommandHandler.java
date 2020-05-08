@@ -57,8 +57,12 @@ final class ReflectedCommandHandler implements CommandHandler {
 
     @Override
     public boolean equals(final Object other) {
-        if (this == other) return true;
-        if (other == null || getClass() != other.getClass()) return false;
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
         final ReflectedCommandHandler rch = (ReflectedCommandHandler) other;
         return Objects.equals(caller, rch.caller) &&
             Objects.equals(executor, rch.executor) &&

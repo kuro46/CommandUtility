@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
@@ -30,15 +30,15 @@ public final class BukkitPlatform implements Platform {
         final Map<String, CommandCompleter> completers = new HashMap<>();
         completers.put("worlds", data -> {
             return Bukkit.getWorlds().stream()
-                .map(World::getName)
-                .filter(s -> s.startsWith(data.getCurrentValue()))
-                .collect(Collectors.toList());
+                    .map(World::getName)
+                    .filter(s -> s.startsWith(data.getCurrentValue()))
+                    .collect(Collectors.toList());
         });
         completers.put("players", data -> {
             return Bukkit.getOnlinePlayers().stream()
-                .map(Player::getName)
-                .filter(s -> s.startsWith(data.getCurrentValue()))
-                .collect(Collectors.toList());
+                    .map(Player::getName)
+                    .filter(s -> s.startsWith(data.getCurrentValue()))
+                    .collect(Collectors.toList());
         });
         return completers;
     }
@@ -66,11 +66,11 @@ public final class BukkitPlatform implements Platform {
             final List<String> commandLine = new ArrayList<>();
             commandLine.add(command.getName());
             Arrays.stream(args)
-                .filter(s -> !s.isEmpty())
-                .forEach(commandLine::add);
+                    .filter(s -> !s.isEmpty())
+                    .forEach(commandLine::add);
             final CompletingPosition pos = args.length >= 1 && args[args.length - 1].isEmpty()
-                ? CompletingPosition.NEXT
-                : CompletingPosition.LAST;
+                    ? CompletingPosition.NEXT
+                    : CompletingPosition.LAST;
             return inner.complete(sender, pos, commandLine);
         }
     }

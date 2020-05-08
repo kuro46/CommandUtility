@@ -1,8 +1,8 @@
 package dev.shirokuro.commandutility;
 
+import java.util.StringJoiner;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import java.util.StringJoiner;
 
 /**
  * {@code HelpCommandHandler} is a {@code CommandHandler} to display help messages of all commands.
@@ -39,13 +39,13 @@ public final class HelpCommandHandler implements CommandHandler {
             final StringJoiner sj = new StringJoiner(" ");
             sj.add(ChatColor.GRAY + "/" + command.getSections() + ChatColor.RESET);
             command.getArgs().stream()
-                .map(info -> {
-                    final ChatColor prefix = info.isRequired()
-                        ? ChatColor.GOLD
-                        : ChatColor.YELLOW;
-                    return prefix + info.toString(false) + ChatColor.RESET;
-                })
-                .forEach(sj::add);
+                    .map(info -> {
+                        final ChatColor prefix = info.isRequired()
+                                ? ChatColor.GOLD
+                                : ChatColor.YELLOW;
+                        return prefix + info.toString(false) + ChatColor.RESET;
+                    })
+                    .forEach(sj::add);
             sender.sendMessage(sj.toString());
             command.getDescription().ifPresent(description -> {
                 sender.sendMessage("  - " + description);

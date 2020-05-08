@@ -3,11 +3,8 @@ package dev.shirokuro.commandutility.platform;
 import be.seeseemelk.mockbukkit.*;
 import com.google.common.base.Splitter;
 import dev.shirokuro.commandutility.TestPlugin;
-import java.io.StringReader;
 import java.util.*;
-import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.*;
 import org.junit.jupiter.api.*;
@@ -41,8 +38,8 @@ public final class BukkitPlatformTests {
 
     @ParameterizedTest
     @CsvSource({
-        "foo bar",
-        "foo"
+            "foo bar",
+            "foo"
     })
     public void test_execute(final String commandLine) {
         server.getCommandMap().dispatch(Bukkit.getConsoleSender(), commandLine);
@@ -51,9 +48,9 @@ public final class BukkitPlatformTests {
 
     @ParameterizedTest
     @CsvSource({
-        "'foo bar ',NEXT",
-        "foo bar,LAST",
-        "'foo   bar  ',NEXT",
+            "'foo bar ',NEXT",
+            "foo bar,LAST",
+            "'foo   bar  ',NEXT",
     })
     public void test_complete(final String commandLine, final CompletingPosition completingPos) {
         server.getCommandMap().tabComplete(Bukkit.getConsoleSender(), commandLine);
