@@ -35,12 +35,12 @@ public interface ErrorHandler {
      * Called when {@link CommandGroup} couldn't find preferred command for {@link CommandSender}'s input.
      * <p>It is recommended to send usage message to {@code dispatcher} like below.</p>
      * <pre>
-     * String requiredStr = command.getArgs().stream()
+     * String argsStr = command.getArgs().stream()
      *         .map(info -&gt; info.toString(false))
      *         .collect(Collectors.joining(&quot; &quot;));
      * StringJoiner joiner = new StringJoiner(&quot; &quot;);
      * command.getSections().forEach(joiner::add);
-     * joiner.add(requiredStr);
+     * joiner.add(argsStr);
      * dispatcher.sendMessage(&quot;Usage: /&quot; + joiner.toString());
      * </pre>
      *
@@ -152,12 +152,12 @@ public interface ErrorHandler {
 
         @Override
         public void onInvalidArgs(final CommandGroup caller, final CommandSender dispatcher, final Command command) {
-            final String requiredStr = command.getArgs().stream()
+            final String argsStr = command.getArgs().stream()
                     .map(info -> info.toString(false))
                     .collect(Collectors.joining(" "));
             final StringJoiner joiner = new StringJoiner(" ");
             command.getSections().forEach(joiner::add);
-            joiner.add(requiredStr);
+            joiner.add(argsStr);
             dispatcher.sendMessage("Usage: " + joiner.toString());
         }
     }
