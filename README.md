@@ -6,7 +6,7 @@ CommandUtilityは、Bukkitでのコマンド処理を改善するために開発
 独自のコマンドハンドラを使用することで、コマンドの実行処理や、Tab補完機能が簡単に実装できるようになります。
 
 - [Javadoc](https://shirokuro.dev/javadoc/commandutility/latest/)
-- [リポジトリ](https://maven.shirokuro.dev/repos/releases/)
+- [リポジトリ](https://shirokuro.dev/maven/repos/releases/dev/shirokuro/commandutility/)
 
 ## 導入方法
 
@@ -16,7 +16,7 @@ Mavenの場合、まずリポジトリを以下のように追加し、
 ```xml
 <repository>
     <id>shirokuro-repo</id>
-    <url>https://maven.shirokuro.dev/repos/releases/</url>
+    <url>https://shirokuro.dev/maven/repos/releases/</url>
 </repository>
 ```
 以下のように依存関係に追加してください。
@@ -33,7 +33,7 @@ Mavenの場合、まずリポジトリを以下のように追加し、
 
 Gradle(Groovy DSL)の場合、まずリポジトリを以下のように追加し、
 ```groovy
-maven { url 'https://maven.shirokuro.dev/repos/releases/' }
+maven { url 'https://shirokuro.dev/maven/repos/releases/' }
 ```
 以下のように依存関係に追加してください。
 ```groovy
