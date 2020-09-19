@@ -8,13 +8,15 @@
         <module name="Indentation">
             <property name="lineWrappingIndentation" value="8"/>
         </module>
-        <!-- Imports -->
         <module name="UnusedImports"/>
         <module name="RedundantImport"/>
+        <!-- Imports -->
+        <!--
         <module name="ImportOrder">
             <property name="separated" value="true"/>
             <property name="sortStaticImportsAlphabetically" value="true"/>
         </module>
+        -->
         <!-- Brackets -->
         <module name="LeftCurly"/>
         <module name="RightCurly"/>
