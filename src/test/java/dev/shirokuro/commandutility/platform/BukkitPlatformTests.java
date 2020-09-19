@@ -49,7 +49,7 @@ public final class BukkitPlatformTests {
     @ParameterizedTest
     @CsvSource({
             "'foo bar ',NEXT",
-            "foo bar,LAST",
+            "foo bar,CURRENT",
             "'foo   bar  ',NEXT",
     })
     public void test_complete(final String commandLine, final CompletingPosition completingPos) {

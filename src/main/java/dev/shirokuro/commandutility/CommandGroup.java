@@ -161,7 +161,7 @@ public final class CommandGroup implements PlatformCommandHandler {
 
     @Override
     public List<String> complete(final CommandSender sender, final CompletingPosition pos, final List<String> commandLine) {
-        final String completing = pos == CompletingPosition.LAST
+        final String completing = pos == CompletingPosition.CURRENT
                 ? Iterables.getLast(commandLine)
                 : "";
         final BranchNode.WalkResult findResult = root.walk(commandLine);
@@ -172,12 +172,20 @@ public final class CommandGroup implements PlatformCommandHandler {
         } else {
             final CommandNode commandNode = findResult.getCommand().get();
             final Command command = commandNode.getCommand();
+            if (command.getArgs().isEmpty()) {
+                return Collections.emptyList();
+            }
+            final List<String> args = findResult.getUnreachablePaths();
+            // Get preferred ArgumentInfo.
+            // If number of args is bigger than params, use last param. (below is example)
+            // param1 param2 param3 <- Use this
+            // arg1   arg2   arg3   arg4...
             final ArgumentInfo argumentInfo = command.getArgs().get(
                     Math.min(command.getArgs().size() - 1,
-                        findResult.getUnreachablePaths().size()));
+                        args.size()));
             final String argumentName = argumentInfo.getName();
             try {
-                final List<String> argsForParse = new ArrayList<>(findResult.getUnreachablePaths());
+                final List<String> argsForParse = new ArrayList<>(args);
                 argsForParse.add(completing);
                 final String argumentValue = command.parseArgs(argsForParse, true).get(argumentName);
                 final CommandCompleter completer = argumentInfo.getCompleterName()

@@ -70,7 +70,7 @@ public final class BukkitPlatform implements Platform {
                     .forEach(commandLine::add);
             final CompletingPosition pos = args.length >= 1 && args[args.length - 1].isEmpty()
                     ? CompletingPosition.NEXT
-                    : CompletingPosition.LAST;
+                    : CompletingPosition.CURRENT;
             return inner.complete(sender, pos, commandLine);
         }
     }
