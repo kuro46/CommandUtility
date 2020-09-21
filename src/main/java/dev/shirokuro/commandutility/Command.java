@@ -19,7 +19,11 @@ public final class Command {
     private final CommandHandler handler;
     private final String description;
 
-    public Command(final List<String> sections, final List<Parameter> parameters, final CommandHandler handler, final String description) {
+    public Command(
+            final List<String> sections,
+            final List<Parameter> parameters,
+            final CommandHandler handler,
+            final String description) {
         Objects.requireNonNull(sections, "sections");
         Objects.requireNonNull(parameters, "params");
         Objects.requireNonNull(handler, "handler");

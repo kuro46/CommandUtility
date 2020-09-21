@@ -166,9 +166,14 @@ public final class CommandGroup implements PlatformCommandHandler {
                 : "";
         final BranchNode.WalkResult findResult = root.walk(commandLine);
         if (!findResult.getCommand().isPresent()) {
-            return Iterables.getLast(findResult.getBranches()).getChildren().keySet().stream()
+            final List<String> unreachablePaths = findResult.getUnreachablePaths();
+            if ((unreachablePaths.size() == 1 && pos == CompletingPosition.CURRENT) || (unreachablePaths.isEmpty() && pos == CompletingPosition.NEXT)) {
+                return Iterables.getLast(findResult.getBranches()).getChildren().keySet().stream()
                     .filter(s -> s.startsWith(completing))
                     .collect(Collectors.toList());
+            } else {
+                return Collections.emptyList();
+            }
         } else {
             final CommandNode commandNode = findResult.getCommand().get();
             final Command command = commandNode.getCommand();

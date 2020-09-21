@@ -6,6 +6,8 @@ import dev.shirokuro.commandutility.platform.CompletingPosition;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,6 +37,36 @@ public class CommandGroupTests {
         final CommandGroup group = new CommandGroup(new TestPlatform());
         group.addAll(new ZeroParamTestHandler());
         group.complete(new CommandSenderImpl(), CompletingPosition.NEXT, Arrays.asList("foo", "bar", "hoge"));
+    }
+
+    @Test
+    public void tryCompleteAfterIncorrectSubcommand() {
+        final CommandGroup group = new CommandGroup(new TestPlatform());
+        group.addAll(new FooBarAndFooBuzzHandler());
+        final List<String> result =
+                group.complete(new CommandSenderImpl(), CompletingPosition.NEXT, Arrays.asList("foo", "hoge"));
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void tryCompleteInTypingWord() {
+        final CommandGroup group = new CommandGroup(new TestPlatform());
+        group.addAll(new FooBarAndFooBuzzHandler());
+        final List<String> result =
+                group.complete(new CommandSenderImpl(), CompletingPosition.CURRENT, Arrays.asList("foo", "bu"));
+        assertEquals(result, Collections.singletonList("buzz"));
+    }
+
+    public static final class FooBarAndFooBuzzHandler {
+        @Executor("foo bar")
+        public void fooBar(ExecutionData data) {
+
+        }
+
+        @Executor("foo buzz")
+        public void fooBuzz(ExecutionData data) {
+
+        }
     }
 
     public static final class ZeroParamTestHandler {
