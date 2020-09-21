@@ -13,7 +13,7 @@ public final class TestPlugin extends JavaPlugin {
         super();
     }
 
-    protected TestPlugin(JavaPluginLoader loader, PluginDescriptionFile descriptionFile, File dataFolder, File file) {
+    TestPlugin(JavaPluginLoader loader, PluginDescriptionFile descriptionFile, File dataFolder, File file) {
         super(loader, descriptionFile, dataFolder, file);
     }
 
