@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,12 +50,36 @@ public class CommandGroupTests {
     }
 
     @Test
-    public void tryCompleteInTypingWord() {
+    public void tryCompleteSubcommandInTypingWord() {
         final CommandGroup group = new CommandGroup(new TestPlatform());
         group.addAll(new FooBarAndFooBuzzHandler());
         final List<String> result =
                 group.complete(new CommandSenderImpl(), CompletingPosition.CURRENT, Arrays.asList("foo", "bu"));
         assertEquals(result, Collections.singletonList("buzz"));
+    }
+
+    @Test
+    public void tryCompleteArgumentInTypingWord() {
+        final CommandGroup group = new CommandGroup(new TestPlatform());
+        group.addAll(new TryCompleteArgumentInTypingWordHandler(data -> assertEquals("ho", data.getCurrentValue())));
+        group.complete(new CommandSenderImpl(), CompletingPosition.CURRENT, Arrays.asList("foo", "bar", "ho"));
+    }
+
+    public static final class TryCompleteArgumentInTypingWordHandler {
+        private final Consumer<CompletionData> callback;
+
+        public TryCompleteArgumentInTypingWordHandler(Consumer<CompletionData> callback) {
+            this.callback = callback;
+        }
+
+        @Executor("foo bar <hoge>")
+        public void fooBar(ExecutionData data) {
+        }
+
+        @Completer("foo bar <hoge>")
+        public void completeFooBar(CompletionData data) {
+            callback.accept(data);
+        }
     }
 
     public static final class FooBarAndFooBuzzHandler {

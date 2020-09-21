@@ -185,18 +185,20 @@ public final class CommandGroup implements PlatformCommandHandler {
             // If number of args is bigger than params, use last param. (below is example)
             // param1 param2 param3 <- Use this
             // arg1   arg2   arg3   arg4...
-            final Parameter parameter = command.getParameters().get(
+            final Parameter completingParameter = command.getParameters().get(
                     Math.min(command.getParameters().size() - 1,
                         args.size()));
-            final String parameterName = parameter.getName();
+            final String completingParameterName = completingParameter.getName();
             try {
                 final List<String> argsForParse = new ArrayList<>(args);
-                argsForParse.add(completing);
-                final String argumentValue = command.parseArgs(argsForParse, true).get(parameterName);
-                final CommandCompleter completer = parameter.getCompleterName()
+                if (pos == CompletingPosition.NEXT) {
+                    argsForParse.add("");
+                }
+                final String completingValue = command.parseArgs(argsForParse, true).get(completingParameterName);
+                final CommandCompleter completer = completingParameter.getCompleterName()
                         .map(completerMap::get)
                         .orElse(command.getHandler());
-                return completer.complete(new CompletionData(sender, commandNode, parameterName, argumentValue));
+                return completer.complete(new CompletionData(sender, commandNode, completingParameterName, completingValue));
             } catch (Command.ArgumentNotEnoughException e) {
                 throw new RuntimeException("unreachable", e);
             }
