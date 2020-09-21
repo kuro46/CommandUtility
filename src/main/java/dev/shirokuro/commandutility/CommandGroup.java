@@ -172,26 +172,26 @@ public final class CommandGroup implements PlatformCommandHandler {
         } else {
             final CommandNode commandNode = findResult.getCommand().get();
             final Command command = commandNode.getCommand();
-            if (command.getArgs().isEmpty()) {
+            if (command.getParameters().isEmpty()) {
                 return Collections.emptyList();
             }
             final List<String> args = findResult.getUnreachablePaths();
-            // Get preferred ArgumentInfo.
+            // Get preferred Parameter.
             // If number of args is bigger than params, use last param. (below is example)
             // param1 param2 param3 <- Use this
             // arg1   arg2   arg3   arg4...
-            final ArgumentInfo argumentInfo = command.getArgs().get(
-                    Math.min(command.getArgs().size() - 1,
+            final Parameter parameter = command.getParameters().get(
+                    Math.min(command.getParameters().size() - 1,
                         args.size()));
-            final String argumentName = argumentInfo.getName();
+            final String parameterName = parameter.getName();
             try {
                 final List<String> argsForParse = new ArrayList<>(args);
                 argsForParse.add(completing);
-                final String argumentValue = command.parseArgs(argsForParse, true).get(argumentName);
-                final CommandCompleter completer = argumentInfo.getCompleterName()
+                final String argumentValue = command.parseArgs(argsForParse, true).get(parameterName);
+                final CommandCompleter completer = parameter.getCompleterName()
                         .map(completerMap::get)
                         .orElse(command.getHandler());
-                return completer.complete(new CompletionData(sender, commandNode, argumentName, argumentValue));
+                return completer.complete(new CompletionData(sender, commandNode, parameterName, argumentValue));
             } catch (Command.ArgumentNotEnoughException e) {
                 throw new RuntimeException("unreachable", e);
             }

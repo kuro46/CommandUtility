@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class ArgumentInfo {
+public final class Parameter {
     private static final Pattern ARGUMENT_STR_VALIDATOR =
             Pattern.compile("^[<\\[](.*?)(?::(.*))?[>\\]]$");
 
@@ -13,7 +13,7 @@ public final class ArgumentInfo {
     private final String completerName;
     private final boolean required;
 
-    public ArgumentInfo(final String name, final String completerName, final boolean required) {
+    public Parameter(final String name, final String completerName, final boolean required) {
         this.name = Objects.requireNonNull(name);
         this.completerName = completerName;
         this.required = required;
@@ -26,7 +26,7 @@ public final class ArgumentInfo {
      *
      * @return ArgumentInfo. If {@code str} is a invalid format, It will returns empty optional.
      */
-    public static Optional<ArgumentInfo> fromString(final String str) {
+    public static Optional<Parameter> fromString(final String str) {
         final Matcher m = ARGUMENT_STR_VALIDATOR.matcher(str);
         if (!m.find()) {
             return Optional.empty();
@@ -34,7 +34,7 @@ public final class ArgumentInfo {
         final String name = m.group(1);
         final String completerName = m.group(2);
         final boolean required = str.charAt(0) == '<';
-        return Optional.of(new ArgumentInfo(name, completerName, required));
+        return Optional.of(new Parameter(name, completerName, required));
     }
 
     public String getName() {
@@ -71,10 +71,10 @@ public final class ArgumentInfo {
 
     @Override
     public boolean equals(final Object other) {
-        if (other == null || !(other instanceof ArgumentInfo)) {
+        if (!(other instanceof Parameter)) {
             return false;
         }
-        final ArgumentInfo casted = (ArgumentInfo) other;
+        final Parameter casted = (Parameter) other;
         return required == casted.required
             && Objects.equals(name, casted.name)
             && Objects.equals(completerName, casted.completerName);
@@ -85,5 +85,3 @@ public final class ArgumentInfo {
         return Objects.hash(name, completerName, required);
     }
 }
-
-

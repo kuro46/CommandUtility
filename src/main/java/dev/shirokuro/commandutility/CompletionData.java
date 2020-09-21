@@ -7,13 +7,13 @@ public final class CompletionData {
 
     private final CommandSender sender;
     private final CommandNode command;
-    private final String name;
+    private final String parameterName;
     private final String currentValue;
 
-    public CompletionData(CommandSender sender, CommandNode command, String name, String currentValue) {
+    public CompletionData(CommandSender sender, CommandNode command, String parameterName, String currentValue) {
         this.sender = Objects.requireNonNull(sender);
         this.command = Objects.requireNonNull(command);
-        this.name = Objects.requireNonNull(name);
+        this.parameterName = Objects.requireNonNull(parameterName);
         this.currentValue = Objects.requireNonNull(currentValue);
     }
 
@@ -26,12 +26,22 @@ public final class CompletionData {
     }
 
     /**
-     * Returns name of an argument that completing now.
+     * Returns parameter name that completing now.
      *
-     * @return name of an argument
+     * @return parameter name
      */
+    public String getParameterName() {
+        return parameterName;
+    }
+
+    /**
+     * @see #getParameterName()
+     * @deprecated Please use {@link #getParameterName()} instead
+     * @return parameter name
+     */
+    @Deprecated
     public String getName() {
-        return name;
+        return parameterName;
     }
 
     /**

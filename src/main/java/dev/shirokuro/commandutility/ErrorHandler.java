@@ -152,12 +152,12 @@ public interface ErrorHandler {
 
         @Override
         public void onInvalidArgs(final CommandGroup caller, final CommandSender dispatcher, final Command command) {
-            final String argsStr = command.getArgs().stream()
+            final String params = command.getParameters().stream()
                     .map(info -> info.toString(false))
                     .collect(Collectors.joining(" "));
             final StringJoiner joiner = new StringJoiner(" ");
             command.getSections().forEach(joiner::add);
-            joiner.add(argsStr);
+            joiner.add(params);
             dispatcher.sendMessage("Usage: " + joiner.toString());
         }
     }

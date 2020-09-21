@@ -19,7 +19,7 @@ public class CommandNodeTests {
     @Test
     public void fromStringTestWithAll() {
         final CommandNode cmd1 = createCommand("foo bar buz <hoge> [piyo]", "");
-        final List<ArgumentInfo> infoList = Arrays.asList(ArgumentInfo.fromString("<hoge>").get(), ArgumentInfo.fromString("[piyo]").get());
+        final List<Parameter> infoList = Arrays.asList(Parameter.fromString("<hoge>").get(), Parameter.fromString("[piyo]").get());
         final CommandNode cmd2 = new CommandNode(new BranchNode("root").branch("foo").branch("bar"),
                 "buz",
                 new Command(

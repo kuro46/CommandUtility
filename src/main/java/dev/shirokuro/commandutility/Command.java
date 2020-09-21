@@ -15,19 +15,19 @@ import java.util.StringJoiner;
 
 public final class Command {
     private final List<String> sections;
-    private final List<ArgumentInfo> args;
+    private final List<Parameter> parameters;
     private final CommandHandler handler;
     private final String description;
 
-    public Command(final List<String> sections, final List<ArgumentInfo> args, final CommandHandler handler, final String description) {
+    public Command(final List<String> sections, final List<Parameter> parameters, final CommandHandler handler, final String description) {
         Objects.requireNonNull(sections, "sections");
-        Objects.requireNonNull(args, "args");
+        Objects.requireNonNull(parameters, "params");
         Objects.requireNonNull(handler, "handler");
         this.sections = ImmutableList.copyOf(sections);
-        this.args = ImmutableList.copyOf(args);
+        this.parameters = ImmutableList.copyOf(parameters);
         this.handler = handler;
         this.description = description;
-        validateArgsOrder();
+        validateParameterOrder();
     }
 
     public static Command fromString(final CommandHandler handler, final String command, final String description) {
@@ -36,49 +36,49 @@ public final class Command {
         if (command.trim().isEmpty()) {
             throw new IllegalArgumentException("command is empty!");
         }
-        final List<ArgumentInfo> args = new ArrayList<>();
+        final List<Parameter> parameters = new ArrayList<>();
         final List<String> sections = new ArrayList<>();
         for (final String part : Splitter.on(' ').split(command)) {
-            final Optional<ArgumentInfo> optionalInfo = ArgumentInfo.fromString(part);
+            final Optional<Parameter> optionalInfo = Parameter.fromString(part);
             if (optionalInfo.isPresent()) {
-                args.add(optionalInfo.get());
+                parameters.add(optionalInfo.get());
             } else {
-                if (!args.isEmpty()) {
-                    throw new RuntimeException("Found command part after argument part");
+                if (!parameters.isEmpty()) {
+                    throw new RuntimeException("Found command part after parameter part");
                 }
                 sections.add(part);
             }
         }
-        return new Command(sections, args, handler, description);
+        return new Command(sections, parameters, handler, description);
     }
 
-    private void validateArgsOrder() {
-        for (int i = 1; i < args.size(); i++) {
-            if (args.get(i).isRequired() && args.get(i - 1).isOptional()) {
-                throw new IllegalArgumentException("Found required argument after optional argument");
+    private void validateParameterOrder() {
+        for (int i = 1; i < parameters.size(); i++) {
+            if (parameters.get(i).isRequired() && parameters.get(i - 1).isOptional()) {
+                throw new IllegalArgumentException("Found a required parameter after optional parameters");
             }
         }
     }
 
-    public Map<String, String> parseArgs(final List<String> argumentsList, final boolean ignoreNotEnough) throws ArgumentNotEnoughException {
-        Objects.requireNonNull(argumentsList);
-        if (args.isEmpty()) {
+    public Map<String, String> parseArgs(final List<String> args, final boolean ignoreNotEnough) throws ArgumentNotEnoughException {
+        Objects.requireNonNull(args);
+        if (parameters.isEmpty()) {
             return Collections.emptyMap();
         }
         final Map<String, String> result = new HashMap<>();
-        final Iterator<String> iterator = argumentsList.iterator();
-        for (ArgumentInfo info : args) {
+        final Iterator<String> iterator = args.iterator();
+        for (final Parameter parameter : parameters) {
             if (!iterator.hasNext()) {
-                if (ignoreNotEnough || info.isOptional()) {
+                if (ignoreNotEnough || parameter.isOptional()) {
                     break;
                 } else {
                     throw new ArgumentNotEnoughException();
                 }
             }
-            result.put(info.getName(), iterator.next());
+            result.put(parameter.getName(), iterator.next());
         }
         if (iterator.hasNext()) {
-            result.compute(args.get(result.size() - 1).getName(), (key, value) -> {
+            result.compute(parameters.get(result.size() - 1).getName(), (key, value) -> {
                 final StringJoiner joiner = new StringJoiner(" ");
                 joiner.add(value);
                 while (iterator.hasNext()) {
@@ -98,8 +98,8 @@ public final class Command {
         return sections;
     }
 
-    public List<ArgumentInfo> getArgs() {
-        return args;
+    public List<Parameter> getParameters() {
+        return parameters;
     }
 
     public CommandHandler getHandler() {
@@ -111,25 +111,25 @@ public final class Command {
         if (this == other) {
             return true;
         }
-        if (other == null || !(other instanceof Command)) {
+        if (!(other instanceof Command)) {
             return false;
         }
         final Command command = (Command) other;
         return Objects.equals(sections, command.sections) &&
-            Objects.equals(args, command.args) &&
+            Objects.equals(parameters, command.parameters) &&
             Objects.equals(handler, command.handler) &&
             Objects.equals(description, command.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sections, args, handler, description);
+        return Objects.hash(sections, parameters, handler, description);
     }
 
     @Override
     public String toString() {
         return "Command{sections:'" + sections +
-            "',args='" + args +
+            "',parameters='" + parameters +
             "',handler='" + handler +
             "',description='" + description + "'}";
     }

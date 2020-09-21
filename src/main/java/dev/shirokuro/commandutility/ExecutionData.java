@@ -81,20 +81,20 @@ public final class ExecutionData {
     }
 
     /**
-     * Gets argument value by specified name.
+     * Gets argument value by specified parameter name.
      *
-     * @param argumentName name of argument
+     * @param parameterName parameter name
      * @return value
      */
-    public Optional<String> get(final String argumentName) {
-        return Optional.ofNullable(args.get(Objects.requireNonNull(argumentName)));
+    public Optional<String> get(final String parameterName) {
+        return Optional.ofNullable(args.get(Objects.requireNonNull(parameterName)));
     }
 
-    public String getOrNull(final String argumentName) {
-        return get(argumentName).orElse(null);
+    public String getOrNull(final String parameterName) {
+        return get(parameterName).orElse(null);
     }
 
-    public String getOrFail(final String argumentName) {
-        return get(argumentName).orElseThrow(() -> new NoSuchElementException("No value named " + argumentName + "exist"));
+    public String getOrFail(final String parameterName) {
+        return get(parameterName).orElseThrow(() -> new NoSuchElementException("No parameter named " + parameterName + "exists"));
     }
 }
