@@ -66,7 +66,7 @@ public final class BranchNode implements Node {
                     .forEach(node -> {
                         if (node instanceof BranchNode) {
                             branches.addLast((BranchNode) node);
-                        } else {
+                        } else if (node instanceof CommandNode) {
                             commands.add((CommandNode) node);
                         }
                     });
