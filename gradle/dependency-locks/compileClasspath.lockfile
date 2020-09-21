@@ -8,4 +8,5 @@ commons-lang:commons-lang:2.6
 junit:junit:4.10
 org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT
 org.hamcrest:hamcrest-core:1.1
+org.projectlombok:lombok:1.18.12
 org.yaml:snakeyaml:1.19
