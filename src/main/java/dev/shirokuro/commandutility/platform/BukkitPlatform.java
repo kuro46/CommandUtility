@@ -56,7 +56,7 @@ public final class BukkitPlatform implements Platform {
         public boolean onCommand(final CommandSender sender, final Command command, final String alias, final String[] args) {
             final List<String> commandLine = new ArrayList<>();
             commandLine.add(command.getName());
-            Arrays.stream(args).forEach(commandLine::add);
+            commandLine.addAll(Arrays.asList(args));
             inner.execute(sender, commandLine);
             return true;
         }
