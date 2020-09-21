@@ -193,9 +193,14 @@ public final class CommandGroup implements PlatformCommandHandler {
                 ? Iterables.getLast(commandLine)
                 : "";
         final BranchNode.WalkResult findResult = root.walk(commandLine);
-        if (!findResult.getCommand().isPresent()) {
-            final List<String> unreachablePaths = findResult.getUnreachablePaths();
-            if ((unreachablePaths.size() == 1 && pos == CompletingPosition.CURRENT) || (unreachablePaths.isEmpty() && pos == CompletingPosition.NEXT)) {
+        final Optional<CommandNode> maybeFoundCommand = findResult.getCommand();
+        final List<String> unreachablePaths = findResult.getUnreachablePaths();
+        //  /- If found branch only      -\  /- If command is found but completing it                        -\
+        if (!maybeFoundCommand.isPresent() || (unreachablePaths.isEmpty() && pos == CompletingPosition.CURRENT)) {
+            //  /- If completing typing branch                                    -\
+            if ((unreachablePaths.size() == 1 && pos == CompletingPosition.CURRENT)
+                || (unreachablePaths.isEmpty() && pos == CompletingPosition.NEXT) // If completing next branch
+                || (unreachablePaths.isEmpty() && pos == CompletingPosition.CURRENT)/* If completing end of word */) {
                 return Iterables.getLast(findResult.getBranches()).getChildren().values().stream()
                     .filter(node -> !(node instanceof AliasNode))
                     .map(Node::getName)
@@ -205,7 +210,7 @@ public final class CommandGroup implements PlatformCommandHandler {
                 return Collections.emptyList();
             }
         } else {
-            final CommandNode commandNode = findResult.getCommand().get();
+            final CommandNode commandNode = maybeFoundCommand.get();
             final Command command = commandNode.getCommand();
             if (command.getParameters().isEmpty()) {
                 return Collections.emptyList();
