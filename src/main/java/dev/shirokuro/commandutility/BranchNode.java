@@ -103,7 +103,13 @@ public final class BranchNode implements Node {
             if (path == null) {
                 break;
             }
-            final Node child = current.getChildren().get(path);
+            Node child = current.getChildren().get(path);
+            if (child == null) {
+                break;
+            }
+            while (child instanceof AliasNode) {
+                child = current.getChildren().get(((AliasNode) child).getAliasOf());
+            }
             if (child == null) {
                 break;
             }

@@ -6,6 +6,8 @@ import dev.shirokuro.commandutility.platform.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import lombok.NonNull;
 import org.bukkit.command.CommandSender;
 
 public final class CommandGroup implements PlatformCommandHandler {
@@ -45,6 +47,32 @@ public final class CommandGroup implements PlatformCommandHandler {
         Objects.requireNonNull(argumentName);
         Objects.requireNonNull(completer);
         completerMap.put(argumentName, completer);
+        return this;
+    }
+
+    /**
+     * Add alias. <br>
+     * <pre>
+     *     // Example
+     *     addAlias("foo b", "bar");
+     *     // If called like above, "/foo b" treated as "/foo bar".
+     * </pre>
+     *
+     * @param aliasPath path of alias
+     * @param targetName target section name
+     * @return CommandGroup
+     */
+    public CommandGroup addAlias(final @NonNull String aliasPath, final @NonNull String targetName) {
+        BranchNode current = root;
+        final Iterator<String> sectionIter = Arrays.asList(aliasPath.split(" ")).iterator();
+        while (sectionIter.hasNext()) {
+            final String section = sectionIter.next();
+            if (sectionIter.hasNext()) {
+                current = current.branch(section);
+            } else {
+                current.addChild(new AliasNode(current, section, targetName));
+            }
+        }
         return this;
     }
 
@@ -168,7 +196,9 @@ public final class CommandGroup implements PlatformCommandHandler {
         if (!findResult.getCommand().isPresent()) {
             final List<String> unreachablePaths = findResult.getUnreachablePaths();
             if ((unreachablePaths.size() == 1 && pos == CompletingPosition.CURRENT) || (unreachablePaths.isEmpty() && pos == CompletingPosition.NEXT)) {
-                return Iterables.getLast(findResult.getBranches()).getChildren().keySet().stream()
+                return Iterables.getLast(findResult.getBranches()).getChildren().values().stream()
+                    .filter(node -> !(node instanceof AliasNode))
+                    .map(Node::getName)
                     .filter(s -> s.startsWith(completing))
                     .collect(Collectors.toList());
             } else {
